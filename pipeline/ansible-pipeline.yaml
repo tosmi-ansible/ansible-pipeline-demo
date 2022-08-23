@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ansible-lint
+  namespace: ansible-pipeline
+spec:
+  tasks:
+    - name: ansible-lint
+      taskRef:
+        name: ansible-lint

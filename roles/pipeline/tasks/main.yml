@@ -27,4 +27,5 @@
 - name: Import git-clone task
   kubernetes.core.k8s:
     state: present
-    src: pipelines/tasks/git-clone.yaml
+    src: git-clone.yaml
+    namespace: ansible-pipeline
