@@ -6,8 +6,7 @@ metadata:
 spec:
   description: "Run ansible lint on repository"
   steps:
-    - image: registry.access.redhat.com/ubi8/ubi-minimal
+    - image: quay.io/ansible/creator-ee:v0.6.0
       command:
-        - /bin/bash
-        - -c
-        - echo "Hello World"
+        - /usr/local/bin/ansible-lint
+        - --version

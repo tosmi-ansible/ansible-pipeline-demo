@@ -1,0 +1,13 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: ansible-listener
+  namespace: ansible-pipeline
+spec:
+  serviceAccountName: pipeline
+  triggers:
+    - name: trigger
+      bindings:
+        - ref: gitea-triggerbinding
+      template:
+        ref: gitea-triggertemplate

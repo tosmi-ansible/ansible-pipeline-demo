@@ -1,0 +1,20 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: gitea-triggertemplate
+  namespace: ansible-pipeline
+spec:
+  params:
+    - name: git-repository-url
+      description: The git repository url
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: something-pushed-
+      spec:
+        pipelineRef:
+          name: ansible-lint
+        params:
+          - name: repository
+            value: $(tt.params.git-repository-url)

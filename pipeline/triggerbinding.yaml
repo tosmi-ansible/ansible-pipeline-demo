@@ -1,0 +1,11 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: gitea-triggerbinding
+  namespace: ansible-pipeline
+spec:
+  params:
+    - name: git-revision
+      value: $(body.after)
+    - name: git-repository-url
+      value: $(body.repository.clone_url)

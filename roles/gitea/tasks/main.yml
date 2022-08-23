@@ -16,6 +16,8 @@
         config:
           server:
             ROOT_URL: https://gitea.apps.ocp.lan.stderr.at
+          webhook:
+            ALLOWED_HOST_LIST: private
       image:
         rootless: true
       # securityContext:
