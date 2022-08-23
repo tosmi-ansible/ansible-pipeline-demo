@@ -1,0 +1,51 @@
+---
+# tasks file for gitea
+- name: Add Gitea helm repository
+  kubernetes.core.helm_repository:
+    name: gitea
+    repo_url: https://dl.gitea.io/charts/
+
+- name: Install Gitea via helm
+  kubernetes.core.helm:
+    name: gitea
+    release_namespace: gitea
+    chart_ref: gitea/gitea
+    chart_version: v6.0.0
+    values:
+      gitea:
+        config:
+          server:
+            ROOT_URL: https://gitea.apps.ocp.lan.stderr.at
+      image:
+        rootless: true
+      # securityContext:
+      #     capabilities:
+      #       add: ["SYS_CHROOT"]
+      postgresql:
+        enabled: true
+      memcached:
+        enabled: false
+
+- name: Create OpenShift route
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: route.openshift.io/v1
+      kind: Route
+      metadata:
+        labels:
+          app: gitea
+        name: gitea-https
+        namespace: gitea
+      spec:
+        host: gitea.apps.ocp.lan.stderr.at
+        port:
+          targetPort: http
+        to:
+          kind: Service
+          name: gitea-http
+          weight: 100
+        wildcardPolicy: None
+        tls:
+          termination: edge
+          insecureEdgeTerminationPolicy: Redirect

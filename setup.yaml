@@ -1,0 +1,5 @@
+- name: Setup local cluster
+  hosts: localhost
+  roles:
+    - gitea
+    - pipeline

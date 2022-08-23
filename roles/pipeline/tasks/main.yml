@@ -1,0 +1,30 @@
+---
+- name: Install the OpenShift Pipelines operator
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: openshift-pipelines-operator-rh
+        namespace: openshift-operators
+      spec:
+        channel: pipelines-1.7
+        installPlanApproval: Automatic
+        name: openshift-pipelines-operator-rh
+        source: redhat-operators
+        sourceNamespace: openshift-marketplace
+
+- name: Create a namespace for the ansible-pipeline
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: ansible-pipeline
+
+- name: Import git-clone task
+  kubernetes.core.k8s:
+    state: present
+    src: pipelines/tasks/git-clone.yaml
