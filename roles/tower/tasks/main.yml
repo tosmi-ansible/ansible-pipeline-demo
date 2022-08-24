@@ -1,0 +1,79 @@
+---
+# tasks file for tower
+- name: Create namespace for Ansible platform operator
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        labels:
+          openshift.io/cluster-monitoring: "true"
+        name: ansible-automation-platform
+
+- name: Create OperatorGroup for Ansible platform operator
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: operators.coreos.com/v1
+      kind: OperatorGroup
+      metadata:
+        name: ansible-automation-platform-operator
+        namespace: ansible-automation-platform
+      spec:
+        targetNamespaces:
+        - ansible-automation-platform
+
+- name: Create Subscription for the Ansible platform operator
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: ansible-automation-platform-operator
+        namespace: ansible-automation-platform
+      spec:
+        channel: stable-2.2
+        installPlanApproval: Automatic
+        name: ansible-automation-platform-operator
+        source: redhat-operators
+        sourceNamespace: openshift-marketplace
+
+# Stolen from https://stackoverflow.com/questions/53198576/ansible-playbook-wait-until-all-pods-running
+- name: Wait for Ansible platform operator pods to be running
+  shell: kubectl get pods -o json -n ansible-automation-platform
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+
+- name: Deploy AutomationController
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: automationcontroller.ansible.com/v1beta1
+      kind: AutomationController
+      metadata:
+        labels:
+        name: ctrl
+        namespace: ansible-automation-platform
+      spec:
+        admin_user: admin
+        create_preload_data: true
+        garbage_collect_secrets: false
+        image_pull_policy: IfNotPresent
+        ingress_type: route
+        loadbalancer_port: 80
+        loadbalancer_protocol: http
+        nodeport_port: 30080
+        postgres_storage_class: ceph-block
+        postgres_storage_requirements:
+          requests:
+            storage: 8Gi
+        projects_persistence: false
+        projects_storage_access_mode: ReadWriteMany
+        projects_storage_size: 5Gi
+        replicas: 1
+        route_host: ctrl.apps.ocp.lan.stderr.at
+        route_tls_termination_mechanism: Edge
+        service_type: ClusterIP
+        task_privileged: false
