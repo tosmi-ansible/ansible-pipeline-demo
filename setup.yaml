@@ -3,3 +3,4 @@
   roles:
     - gitea
     - pipeline
+    - tower
