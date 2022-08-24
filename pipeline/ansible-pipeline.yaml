@@ -4,7 +4,23 @@ metadata:
   name: ansible-lint
   namespace: ansible-pipeline
 spec:
+  workspaces:
+    - name: ansible-lint-ws
   tasks:
+    - name: git-clone
+      params:
+        - name: url
+          value: http://user:passw0rd@gitea-http.gitea:3000/tosmi/ansible.git
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: ansible-lint-ws
     - name: ansible-lint
       taskRef:
         name: ansible-lint
+      workspaces:
+        - name: output
+          workspace: ansible-lint-ws
+      runAfter:
+        - git-clone
