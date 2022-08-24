@@ -1,8 +1,29 @@
-.DEFAULT_GOAL := verify
+.DEFAULT_GOAL := help
 
-.PHONY: collections
-collections:
+###############
+# Help Target #
+###############
+.PHONY: help
+help: ## Show this help screen
+	@echo 'Usage: make <OPTIONS> ... <TARGETS>'
+	@echo ''
+	@echo 'Available targets are:'
+	@echo ''
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+
+#################
+# Setup targets #
+#################
+.PHONY: collections setup pythonlibs
+
+pythonlibs: ## Install required python libraries
+	python -m pip install -q -r collections/requirements.txt
+
+collections: pythonlibs  ## Install required collections
 	ansible-galaxy install -r collections/requirements.yaml
+
+setup: collections ## Run setup playbook
+	ansible-playbook setup.yaml
 
 .PHONY: verify
 verify:
