@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: ansible-lint-
+spec:
+  pipelineRef:
+    name: ansible-lint
+  # params:
+  #   - name: repository
+  #     value: $(tt.params.git-repository-url)
+  workspaces:
+    - name: ansible-lint-ws
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 200Mi
