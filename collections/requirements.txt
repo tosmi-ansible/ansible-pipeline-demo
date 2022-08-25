@@ -1,4 +1,5 @@
 kubernetes >= 12.0.0
+openshift >= 0.13.1
 PyYAML >= 3.11
 ansible >= 2.12
 jmespath >= 1.0
