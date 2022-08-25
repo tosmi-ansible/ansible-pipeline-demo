@@ -1,10 +1,21 @@
-# Ansibel Pipeline Demo
+# Ansible Pipeline Demo
 
 This repository contains a demo that demonstrate how to
 
 - Validate Ansible in an automated fashion
 - Merging changes automatically to different repository branches after validation
 - Trigger Ansible Controller jobs after merging
+
+## Table of contents
+
+* [Ansible Pipeline Demo](Ansible Pipeline Demo)
+* [Table of contents](Table of contents)
+* [Motivation](Motivation)
+* [Tools](Tools)
+* [Pipeline overview](Pipeline overview)
+* [Proposed developer workflow](Proposed developer workflow)
+* [Why OpenShift?](Why OpenShift?)
+* [Setup](Setup)
 
 ## Motivation
 
@@ -56,6 +67,8 @@ We are going to deploy required tools in 3 separate OpenShift namespace:
 
 Don't worry about setting up all those tools, we got you covered
 here. See section [Setup](#Setup).
+
+## Proposed developer workflow
 
 The basic idea is to implement the following developer workflow
 

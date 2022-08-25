@@ -28,3 +28,11 @@ setup: collections ## Run setup playbook
 .PHONY: verify
 verify:
 	@echo "bla"
+
+########*#########
+# Helper targets #
+#########*########
+.PHONY: toc
+
+toc: ## Generate a simple markdown toc, does not support levels!
+	@awk -F'^#+'  '/^#.*/ {gsub("^ ","",$$2);printf "* [%s](%s)\n",$$2,$$2 }' README.md
