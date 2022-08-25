@@ -1,6 +1,6 @@
 # Ansibel Pipeline Demo
 
-This respository contains a demo that demonstrate how to
+This repository contains a demo that demonstrate how to
 
 - Validate Ansible in an automated fashion
 - Merging changes automatically to different repository branches after validation
@@ -8,7 +8,7 @@ This respository contains a demo that demonstrate how to
 
 ## Motivation
 
-Using Ansible for automation is only a starting poing in a longer
+Using Ansible for automation is only a starting point in a longer
 journey. For most larger automation setups the following questions
 arise after automating the first tasks:
 
@@ -19,11 +19,11 @@ arise after automating the first tasks:
   Ansible code and bringing it to production?
 
 Answering the questions above when starting with a blank page is
-hard. There are multiple solutions and even more tools to achive the
+hard. There are multiple solutions and even more tools to achieve the
 desired result.
 
 This Demo setup tries to answer some of these questions. We only
-scratch the surface of what's acutally possible. It's not the
+scratch the surface of what's actually possible. It's not the
 definitive answer but should help getting started without staring at a
 blank page.
 
@@ -54,7 +54,7 @@ We are going to deploy required tools in 3 separate OpenShift namespace:
 - ansible-automation-platform: for our installation of a minimal
   Automation Controller instance
 
-Don't worry about settings up all those tools, we got you covered
+Don't worry about setting up all those tools, we got you covered
 here. See section [Setup](#Setup).
 
 ## Why OpenShift?
@@ -67,7 +67,7 @@ OpenShift is not a strong requirement, any Kubernetes distribution or
 even upstream Kubernetes could also be leveraged.
 
 > :warning: **Persistent storage is required**: For Gitea and the
-> Automation Controller you are going to need persisten storage in
+> Automation Controller you are going to need persistent storage in
 > OpenShift or Kubernetes.
 
 Deploying our pipeline would also be possible without OpenShift. The
