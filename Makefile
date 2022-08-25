@@ -35,4 +35,4 @@ verify:
 .PHONY: toc
 
 toc: ## Generate a simple markdown toc, does not support levels!
-	@awk -F'^#+'  '/^#.*/ {gsub("^ ","",$$2);printf "* [%s](%s)\n",$$2,$$2 }' README.md
+	@awk -F'^#+'  '/^#.*/ && !/^## Table/ && NR!=1  {gsub("^ ","",$$2); link=tolower($$2); gsub(" ","-",link); printf "* [%s](#%s)\n",$$2,link }' README.md
