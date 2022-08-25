@@ -43,3 +43,43 @@ We use the following tools to implement our pipeline
 The graphic depicts our proposed setup:
 
 ![Overview](images/overview.drawio.png)
+
+We are going to deploy required tools in 3 separate OpenShift namespace:
+
+- gitea: for installation of Gitea
+- ansible-pipeline: for storing required Tekton pipeline objects like
+  - Tasks
+  - Pipelines
+  - EventTriggers
+- ansible-automation-platform: for our installation of a minimal
+  Automation Controller instance
+
+Don't worry about settings up all those tools, we got you covered
+here. See section [Setup](#Setup).
+
+## Why OpenShift?
+
+Simple because we can and OpenShift provides an easy way of setting up
+our infrastructure via tools like [Helm](https://helm.io) or
+[Operators](https://operatorhub.io/).
+
+OpenShift is not a strong requirement, any Kubernetes distribution or
+even upstream Kubernetes could also be leveraged.
+
+> :info: **Persistent storage is required**: For Gitea and the
+> Automation Controller you are going to need persisten storage in
+> OpenShift or Kubernetes.
+
+Deploying our pipeline would also be possible without OpenShift. The
+only thing that needs to be replaces is Tekton. But there are plenty
+of tools available for replacement:
+
+- [Jenkins](https://www.jenkins.io) for the classic CI/CD tooling
+- [Gitlab pipelines](https://docs.gitlab.com/ee/ci/pipelines/)
+
+or various pipelines as a service implementations like
+
+- [Circle CI](https://circleci.com/)
+- [Travis](https://www.travis-ci.com/)
+
+## Setup
