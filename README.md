@@ -37,3 +37,9 @@ We use the following tools to implement our pipeline
 - [Tektion](https://tekton.dev/) for implementing our pipeline
 - [Ansible Controller](https://www.ansible.com/products/controller)
   for executing Ansible code
+
+## Pipeline overview
+
+The graphic depicts our proposed setup:
+
+![Overview](images/overview.drawio.png)
