@@ -16,11 +16,13 @@ The demo is running in OpenShift, for reasons why see [here](#why-openshift).
 * [Pipeline overview](#pipeline-overview)
 * [Proposed developer workflow](#proposed-developer-workflow)
 * [Why OpenShift?](#why-openshift?)
-* [Setup](#setup)
+* [Prerequisites](#prerequisites)
+* [Infrastructure setup](#infrastructure-setup)
+* [Preparing required content](#preparing-required-content)
 
 ## Motivation
 
-Using Annsible for automation is only a starting point in a longer
+Using Ansible for automation is only a starting point in a longer
 journey. For most larger automation setups the following questions
 arise after automating the first tasks:
 
@@ -58,7 +60,7 @@ The graphic depicts our proposed setup:
 
 We are going to deploy required tools in 3 separate OpenShift namespace:
 
-- gitea: for installation of Gitea
+- Gitea: for installation of Gitea
 - ansible-pipeline: for storing required Tekton pipeline objects like
   - Tasks
   - Pipelines
@@ -122,6 +124,16 @@ Tekton and Ansible Controller are installed via
 [OLM](https://olm.operatorframework.io/) so to use the setup procedure
 described in [Setup](#setup) you also need an installation of OLM.
 
+You also need the following tools installed, either via a container or
+locally:
+
+- Python 3
+- Ansible
+
+The `setup` Makefile tasks tries to install required Python 3
+dependencies via _collections/requirements.txt_ and required Ansible
+collections via _collections/requirements.yml_.
+
 ## Infrastructure setup
 
 The the root directory of this repository is a [Makefile](Makefile) to
@@ -145,7 +157,30 @@ Usage:
 
 So `make setup` should
 
-- Install Tekton piplines via OLM
+- Install Tekton pipelines via OLM
 - Install Gitea in the `gitea` namespace
 - Install Ansible Automation Controller in the
-  `ansible-automation-platform` namespace.
+  `ansible-automation-platform` namespace again via OLM
+
+For getting the Automation Controller ready you need to provide a
+valid subscription upon first login. Execute the following command to
+get the URL of your Automation Controller instance:
+
+```
+ oc get route -n ansible-automation-platform ctrl -o jsonpath='{.spec.host}{"\n"}'
+```
+
+You also need to create a Gitea user, just open the main Gitea page
+and register a new user. Execute the following command to get the URL
+of your Gitea instance:
+
+```
+oc get route -n gitea gitea-https -o jsonpath='{.spec.host}{"\n"}'
+```
+
+## Preparing required content
+
+This step involves:
+
+- Pushing a template Ansible code repository to Gitea
+- Configuring required Projects and Job Templates in Automation Controller

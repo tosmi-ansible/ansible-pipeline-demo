@@ -23,15 +23,23 @@ collections: pythonlibs  ## Install required collections
 	ansible-galaxy install -r collections/requirements.yaml
 
 setup: collections ## Run setup playbook
-	ansible-playbook setup.yaml
+	ansible-playbook playbooks/setup.yml
 
 .PHONY: verify
 verify:
 	@echo "bla"
 
-########*#########
+###################
+# Content targets #
+###################
+.PHONY: content
+
+content:
+	ansible-playbook playbooks/content.yml
+
+##################
 # Helper targets #
-#########*########
+##################
 .PHONY: toc
 
 toc: ## Generate a simple markdown toc, does not support levels!
