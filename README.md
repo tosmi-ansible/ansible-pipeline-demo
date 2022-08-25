@@ -22,12 +22,12 @@ The demo is running in OpenShift, for reasons why see [here](#why-openshift).
 
 ## Motivation
 
-Using Ansible for automation is only a starting point in a longer
+Using Ansible for automation is only the starting point to a longer
 journey. For most larger automation setups the following questions
 arise after automating the first tasks:
 
 - How can we test our Ansible code base before applying it to
-  production system?
+  production systems?
 - Which tools are available for testing Ansible code?
 - Is it possible to fully automate the whole workflow of testing
   Ansible code and bringing it to production?
@@ -38,8 +38,8 @@ desired result.
 
 This Demo setup tries to answer some of these questions. We only
 scratch the surface of what's actually possible. It's not the
-definitive answer but should help getting started without staring at a
-blank page.
+definitive answer but should help getting started without staring at
+that annoying blank page.
 
 ## Tools
 
@@ -71,6 +71,9 @@ We are going to deploy required tools in 3 separate OpenShift namespace:
 Don't worry about setting up all those tools, we got you covered
 here. See section [Setup](#Setup).
 
+You might ask yourself why the heck is this running in OpenShift?
+Please see [here](#why-openshift) for an explanation.
+
 ## Proposed developer workflow
 
 The basic idea is to implement the following developer workflow
@@ -88,7 +91,7 @@ The basic idea is to implement the following developer workflow
    automatically merged into the *PROD* branch.
 
 This is just a very simple implementation of a possible pipeline but
-we thinks it demonstrates the basic building blocks required.
+we think it demonstrates the basic building blocks required.
 
 ## Why OpenShift?
 
@@ -131,13 +134,13 @@ locally:
 - Ansible
 
 The `setup` Makefile tasks tries to install required Python 3
-dependencies via _collections/requirements.txt_ and required Ansible
-collections via _collections/requirements.yml_.
+dependencies via [](collections/requirements.txt) and required Ansible
+collections via [](collections/requirements.yml).
 
 ## Infrastructure setup
 
-The the root directory of this repository is a [Makefile](Makefile) to
-set everything up. Just run `make help` to get a list of available
+The root directory of this repository contains a [Makefile](Makefile)
+to set everything up. Just run `make help` to get a list of available
 targets:
 
 ```
