@@ -20,7 +20,7 @@ The demo is running in OpenShift, for reasons why see [here](#why-openshift).
 
 ## Motivation
 
-Using Ansible for automation is only a starting point in a longer
+Using Annsible for automation is only a starting point in a longer
 journey. For most larger automation setups the following questions
 arise after automating the first tasks:
 
@@ -113,4 +113,39 @@ or various pipelines as a service implementations like
 - [Circle CI](https://circleci.com/)
 - [Travis](https://www.travis-ci.com/)
 
-## Setup
+## Prerequisites
+
+Running the pipeline was tested on an OpenShift 4.10 cluster with
+[rook-ceph](https://rook.io/) for persistent storage.
+
+Tekton and Ansible Controller are installed via
+[OLM](https://olm.operatorframework.io/) so to use the setup procedure
+described in [Setup](#setup) you also need an installation of OLM.
+
+## Infrastructure setup
+
+The the root directory of this repository is a [Makefile](Makefile) to
+set everything up. Just run `make help` to get a list of available
+targets:
+
+```
+Usage: make <OPTIONS> ... <TARGETS>
+
+Available targets are:
+
+
+Usage:
+  make <target>
+  help             Show this help screen
+  pythonlibs       Install required python libraries
+  collections      Install required collections
+  setup            Run setup playbook
+  toc              Generate a simple markdown toc, does not support levels!
+```
+
+So `make setup` should
+
+- Install Tekton piplines via OLM
+- Install Gitea in the `gitea` namespace
+- Install Ansible Automation Controller in the
+  `ansible-automation-platform` namespace.
