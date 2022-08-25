@@ -1,10 +1,13 @@
 # Ansible Pipeline Demo
 
-This repository contains a demo that demonstrate how to
+This repository contains a simple pipeline that demonstrate how to
 
-- Validate Ansible in an automated fashion
-- Merging changes automatically to different repository branches after validation
-- Trigger Ansible Controller jobs after merging
+- Validate Ansible code in an automated fashion
+- Merging changes automatically to different repository branches after
+  validation
+- Triggering Ansible Controller jobs after merging
+
+The demo is running in OpenShift, for reasons why see [here](#why-openshift).
 
 ## Table of contents
 
