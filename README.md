@@ -8,14 +8,14 @@ This repository contains a demo that demonstrate how to
 
 ## Table of contents
 
-* [Ansible Pipeline Demo](Ansible Pipeline Demo)
-* [Table of contents](Table of contents)
-* [Motivation](Motivation)
-* [Tools](Tools)
-* [Pipeline overview](Pipeline overview)
-* [Proposed developer workflow](Proposed developer workflow)
-* [Why OpenShift?](Why OpenShift?)
-* [Setup](Setup)
+* [Ansible Pipeline Demo](ansible-pipeline-demo)
+* [Table of contents](table-of-contents)
+* [Motivation](motivation)
+* [Tools](tools)
+* [Pipeline overview](pipeline-overview)
+* [Proposed developer workflow](proposed-developer-workflow)
+* [Why OpenShift?](why-openshift?)
+* [Setup](setup)
 
 ## Motivation
 
