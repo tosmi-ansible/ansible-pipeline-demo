@@ -32,10 +32,10 @@ verify:
 ###################
 # Content targets #
 ###################
-.PHONY: content
+.PHONY: prepare-content
 
-content:
-	ansible-playbook playbooks/content.yml
+prepare-content:
+	ansible-playbook playbooks/prepare-content.yml
 
 ##################
 # Helper targets #

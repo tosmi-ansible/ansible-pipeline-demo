@@ -1,0 +1,10 @@
+{
+    "auto_init": false,
+    "description": "A simple example collection",
+    "gitignores": "",
+    "issue_labels": "",
+    "license": "",
+    "name": "ansible-example-collection",
+    "private": false,
+    "readme": ""
+}
