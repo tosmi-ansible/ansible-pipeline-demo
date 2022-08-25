@@ -57,6 +57,23 @@ We are going to deploy required tools in 3 separate OpenShift namespace:
 Don't worry about setting up all those tools, we got you covered
 here. See section [Setup](#Setup).
 
+The basic idea is to implement the following developer workflow
+
+1. Developer checks out git repository with automation code
+2. Developer creates feature branch in automation code repository
+3. Developer modifies / extends automation code
+4. Developer commits automation code changes and pushes to Gitea
+5. Push triggers a pipeline run that verifies changes with _ansible-lint_
+6. If verification is ok, developer can open pull request do *DEV* branch
+7. Push to *DEV* branch triggers a pipeline that executes a Automation
+   Controller Job Template that executes the code in the *DEV* branch
+   on test servers
+8. If Job Template execution did *NOT* produce any errors code is
+   automatically merged into the *PROD* branch.
+
+This is just a very simple implementation of a possible pipeline but
+we thinks it demonstrates the basic building blocks required.
+
 ## Why OpenShift?
 
 Simple because we can and OpenShift provides an easy way of setting up
