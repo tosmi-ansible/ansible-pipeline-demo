@@ -66,7 +66,7 @@ our infrastructure via tools like [Helm](https://helm.io) or
 OpenShift is not a strong requirement, any Kubernetes distribution or
 even upstream Kubernetes could also be leveraged.
 
-> :info: **Persistent storage is required**: For Gitea and the
+> :warning: **Persistent storage is required**: For Gitea and the
 > Automation Controller you are going to need persisten storage in
 > OpenShift or Kubernetes.
 
