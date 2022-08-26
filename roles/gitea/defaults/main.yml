@@ -1,2 +1,5 @@
 ---
 # defaults file for gitea
+gitea_username: developer
+gitea_email: developer@does-not-exist.io
+gitea_skip_gitea: false

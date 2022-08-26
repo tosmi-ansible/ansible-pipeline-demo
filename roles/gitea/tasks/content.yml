@@ -1,0 +1,94 @@
+- name: Check if {{ gitea_username }} already exists
+  ansible.builtin.uri:
+    url: "{{ gitea_url}}/{{ gitea_username }}"
+    method: GET
+    status_code:
+      - 200 # user exists
+      - 404 # user does not exist
+    validate_certs: no
+  register: gitea_user_query
+
+- name: Create fact for user status
+  ansible.builtin.set_fact:
+    gitea_user_registered: "{{ gitea_user_query.status | int == 200 }}"
+
+- name: Create Gitea user and push template if user is not registered
+  block:
+
+  - name: Generate a password for the gitea user {{ gitea_username }} if not specified
+    ansible.builtin.set_fact:
+      gitea_password: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
+    when:
+      - gitea_password is not defined
+
+  - name: Create fact for URL with authentication information
+    ansible.builtin.set_fact:
+      gitea_url_auth: "https://{{ gitea_username}}:{{ gitea_password }}@{{ gitea_route.resources[0].spec.host }}"
+
+  - name: Create a gitea user
+    ansible.builtin.uri:
+      url: "{{ gitea_url}}/user/sign_up"
+      method: POST
+      body_format: form-urlencoded
+      body:
+        user_name: "{{ gitea_username }}"
+        email: "{{ gitea_email}}"
+        password: "{{ gitea_password}}"
+        retype: "{{ gitea_password }}"
+      status_code:
+        - 303 # user sucessfully created
+      validate_certs: no
+
+  - name: Create temporary checkout directory
+    ansible.builtin.tempfile:
+      state: directory
+      suffix: checkout
+    register: checkout_dir
+
+  - name: Clone example Ansible code repository to tmp folder
+    ansible.builtin.git:
+      repo: https://github.com/rhatservices/ansible-example-collection
+      dest: "{{ checkout_dir.path }}"
+
+  - name: Create remote Gitea repository
+    ansible.builtin.uri:
+      url: "{{ gitea_url}}/api/v1/user/repos"
+      user: "{{ gitea_username }}"
+      password: "{{ gitea_password }}"
+      force_basic_auth: yes
+      method: POST
+      status_code:
+        - 201
+        - 409
+      body_format: json
+      body: "{{ lookup('ansible.builtin.file','gitea-repo.json') }}"
+      validate_certs: no
+
+  - name: Create a local development branch
+    ansible.builtin.command: git -c http.sslVerify=false checkout development
+    args:
+      chdir: "{{ checkout_dir.path }}"
+
+  - name: Create a local production branch
+    ansible.builtin.command: git -c http.sslVerify=false checkout production
+    args:
+      chdir: "{{ checkout_dir.path }}"
+
+  - name: Add Gitea as a new remote
+    ansible.builtin.command: git -c http.sslVerify=false remote add gitea "{{ gitea_url_auth }}/{{ gitea_username }}/ansible-example-collection.git"
+    args:
+      chdir: "{{ checkout_dir.path }}"
+
+  - name: Push all branches to gitea
+    ansible.builtin.command: git -c http.sslVerify=false push --all gitea
+    args:
+      chdir: "{{ checkout_dir.path }}"
+
+  # - name: Delete temporary checkout directory
+  #   ansible.builtin.file:
+  #     state: absent
+  #     path: "{{ checkout_dir.path }}"
+  #   when: checkout_dir.path is defined
+
+  when:
+    - not gitea_user_registered
