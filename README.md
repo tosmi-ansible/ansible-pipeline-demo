@@ -199,6 +199,8 @@ TASK [Print Ansible Controller route] ******************************************
 }
 ```
 
+## Preparing required content
+
 For getting the Automation Controller ready you need to provide a
 valid subscription upon first login.
 
@@ -213,13 +215,6 @@ to prepare Ansible Controller for this demo. This will
 - Create a development and production project
 - Create one job template to configure development hosts
 - Create one job template to configure production hosts
-
-## Preparing required content
-
-This step involves:
-
-- Pushing a template Ansible code repository to Gitea
-- Configuring required Projects and Job Templates in Automation Controller
 
 ## setup.yml options
 
