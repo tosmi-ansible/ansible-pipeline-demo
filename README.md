@@ -140,8 +140,12 @@ collections via [](collections/requirements.yml).
 ## Infrastructure setup
 
 The root directory of this repository contains a [Makefile](Makefile)
-to set everything up. Just run `make help` to get a list of available
-targets:
+to set everything up. Just run
+
+```
+make help
+```
+to get a list of available targets:
 
 ```
 Usage: make <OPTIONS> ... <TARGETS>
@@ -158,7 +162,13 @@ Usage:
   toc              Generate a simple markdown toc, does not support levels!
 ```
 
-So `make setup` should
+So
+
+```
+make setup
+```
+
+should
 
 - Install Tekton pipelines via OLM
 - Install Gitea in the `gitea` namespace
@@ -192,13 +202,24 @@ TASK [Print Ansible Controller route] ******************************************
 For getting the Automation Controller ready you need to provide a
 valid subscription upon first login.
 
+After adding a subscription run
+
+```
+make controller-content
+```
+
+to prepare Ansible Controller for this demo. This will
+
+- Create a development and production project
+- Create one job template to configure development hosts
+- Create one job template to configure production hosts
+
 ## Preparing required content
 
 This step involves:
 
 - Pushing a template Ansible code repository to Gitea
 - Configuring required Projects and Job Templates in Automation Controller
-
 
 ## setup.yml options
 
