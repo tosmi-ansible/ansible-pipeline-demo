@@ -4,3 +4,21 @@
     - gitea
     - pipeline
     - tower
+  post_tasks:
+    - name: Print gitea user credentials if newly registered
+      ansible.builtin.debug:
+        msg:
+          - "Gitea user: {{ gitea_username }}"
+          - "Gitea user: {{ gitea_password }}"
+          - "Gitea URL : {{ gitea_url }}"
+      when:
+        - not gitea_skip_gitea | bool
+        - not gitea_user_registered | bool
+
+    - name: Print Ansible Controller route
+      ansible.builtin.debug:
+        msg:
+        - "Please go to {{ tower_url }} and add a subscription!"
+      when:
+        - tower_url is defined
+        - not tower_subscription_installed | bool
