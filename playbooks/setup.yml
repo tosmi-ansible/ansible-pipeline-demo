@@ -15,9 +15,13 @@
         - not gitea_skip_gitea | bool
         - not gitea_user_registered | bool
 
-    - name: Print Ansible Controller route
+    - name: Print Ansible Controller information
       ansible.builtin.debug:
         msg:
+        - "Ansible Controller user    : admin"
+        - "Ansible Controller password: {{ controller_password }}"
+        - "Ansible Controller URL     : {{ controller_url }}"
+        - ""
         - "Go to {{ controller_url }} and add a subscription!"
         - "After adding the subscription execute 'make controller-content"
       when:

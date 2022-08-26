@@ -162,24 +162,35 @@ So `make setup` should
 
 - Install Tekton pipelines via OLM
 - Install Gitea in the `gitea` namespace
+- Push a template collection to the
+  `developer/ansible-example-collection` repository
 - Install Ansible Automation Controller in the
   `ansible-automation-platform` namespace again via OLM
 
+After running `make setup` you will receive a message with
+
+- The URL for your Gitea instance
+- Username and password for Gitea
+- The URL for the Automation Controller
+- Username and password for the Automation Controller
+
+For example:
+
+```
+TASK [Print Ansible Controller route] ********************************************************************************************************************************************************ok: [localhost] => {
+    "msg": [
+        "Ansible Controller user    : admin",
+        "Ansible Controller password: jwQPEvXwmSVT57edYzmPF9yDEOXnzwQ3",
+        "Ansible Controller URL     : https://ctrl.apps.ocp.lan.stderr.at",
+        "",
+        "Go to https://ctrl.apps.ocp.lan.stderr.at and add a subscription!",
+        "After adding the subscription execute 'make controller-content"
+    ]
+}
+```
+
 For getting the Automation Controller ready you need to provide a
-valid subscription upon first login. Execute the following command to
-get the URL of your Automation Controller instance:
-
-```
- oc get route -n ansible-automation-platform ctrl -o jsonpath='{.spec.host}{"\n"}'
-```
-
-You also need to create a Gitea user, just open the main Gitea page
-and register a new user. Execute the following command to get the URL
-of your Gitea instance:
-
-```
-oc get route -n gitea gitea-https -o jsonpath='{.spec.host}{"\n"}'
-```
+valid subscription upon first login.
 
 ## Preparing required content
 
@@ -187,3 +198,11 @@ This step involves:
 
 - Pushing a template Ansible code repository to Gitea
 - Configuring required Projects and Job Templates in Automation Controller
+
+
+## setup.yml options
+
+```
+gitea_skip_gitea: [yes|no] Skip Gitea setup
+controller_subscription_installed: [yes|no] Does the Ansible Automation Controller have a valid subscription?
+```
