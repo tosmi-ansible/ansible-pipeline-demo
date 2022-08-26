@@ -34,8 +34,8 @@ verify:
 ###################
 .PHONY: prepare-content
 
-prepare-content:
-	ansible-playbook playbooks/prepare-content.yml
+controller-content:
+	ansible-playbook playbooks/prepare-content.yml -e controller_subscription_installed=yes
 
 ##################
 # Helper targets #

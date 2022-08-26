@@ -2,7 +2,7 @@
 - ansible.builtin.include_tasks: install.yml
   when: not gitea_skip_gitea | bool
 
-# The Gitea URL is also used in the tower role
+# The Gitea URL is also used in the controller role
 - name: Get Gitea URL from OpenShift
   community.kubernetes.k8s_info:
     api_version: route.openshift.io/v1

@@ -1,5 +1,4 @@
 ---
-# tasks file for tower
 - name: Create namespace for Ansible platform operator
   kubernetes.core.k8s:
     state: present

@@ -3,7 +3,7 @@
   roles:
     - gitea
     - pipeline
-    - tower
+    - controller
   post_tasks:
     - name: Print gitea user credentials if newly registered
       ansible.builtin.debug:
@@ -18,7 +18,8 @@
     - name: Print Ansible Controller route
       ansible.builtin.debug:
         msg:
-        - "Please go to {{ tower_url }} and add a subscription!"
+        - "Go to {{ controller_url }} and add a subscription!"
+        - "After adding the subscription execute 'make controller-content"
       when:
-        - tower_url is defined
-        - not tower_subscription_installed | bool
+        - controller_url is defined
+        - not controller_subscription_installed | bool

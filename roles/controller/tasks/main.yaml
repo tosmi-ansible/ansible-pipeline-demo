@@ -34,4 +34,4 @@
     validate_certs: no
 
 - include_tasks: content.yml
-  when: tower_subscription_installed
+  when: controller_subscription_installed
