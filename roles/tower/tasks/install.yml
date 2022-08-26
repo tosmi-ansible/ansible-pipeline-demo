@@ -77,3 +77,8 @@
         route_tls_termination_mechanism: Edge
         service_type: ClusterIP
         task_privileged: false
+
+- name: Wait for all Ansible platform pods to be running
+  shell: kubectl get pods -o json -n ansible-automation-platform
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]

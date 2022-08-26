@@ -1,0 +1,71 @@
+---
+- name: Create the Pipeline organization
+  ansible.controller.organization:
+    name: Pipeline
+    description: The Pipeline organization
+    state: present
+    # controller variables
+    controller_username: admin
+    controller_password: "{{ controller_password }}"
+    controller_host: "{{ controller_url }}"
+    validate_certs: no
+
+- name: Create a project for our development branch
+  ansible.controller.project:
+    name: Pipeline - SOE - DEV
+    description: SOE repository DEV branch
+    state: present
+    organization: Pipeline
+    scm_url: "{{ gitea_url}}/{{ gitea_username }}/ansible-example-collection"
+    scm_type: git
+    scm_branch: development
+    # controller variables
+    controller_username: admin
+    controller_password: "{{ controller_password }}"
+    controller_host: "{{ controller_url }}"
+    validate_certs: no
+
+- name: Create a project for our production branch
+  ansible.controller.project:
+    name: Pipeline - SOE - PROD
+    description: SOE repository PROD branch
+    state: present
+    organization: Pipeline
+    scm_url: "{{ gitea_url}}/{{ gitea_username }}/ansible-example-collection"
+    scm_type: git
+    scm_branch: production
+    # controller variables
+    controller_username: admin
+    controller_password: "{{ controller_password }}"
+    controller_host: "{{ controller_url }}"
+    validate_certs: no
+
+- name: Create a job template for configuring development hosts
+  ansible.controller.job_template:
+    name: Pipeline - SOE - Development hosts
+    description: Rollout SOE to development hosts
+    state: present
+    organization: Pipeline
+    project: "Pipeline - SOE - DEV"
+    playbook: "playbooks/linux-soe.yml"
+    inventory: "Demo Inventory"
+    # controller variables
+    controller_username: admin
+    controller_password: "{{ controller_password }}"
+    controller_host: "{{ controller_url }}"
+    validate_certs: no
+
+- name: Create a job template for configuring production hosts
+  ansible.controller.job_template:
+    name: Pipeline - SOE - Production hosts
+    description: Rollout SOE to production hosts
+    state: present
+    organization: Pipeline
+    project: "Pipeline - SOE - PROD"
+    playbook: "playbooks/linux-soe.yml"
+    inventory: "Demo Inventory"
+    # controller variables
+    controller_username: admin
+    controller_password: "{{ controller_password }}"
+    controller_host: "{{ controller_url }}"
+    validate_certs: no
