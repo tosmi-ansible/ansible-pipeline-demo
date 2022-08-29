@@ -93,6 +93,16 @@ The basic idea is to implement the following developer workflow
 This is just a very simple implementation of a possible pipeline but
 we think it demonstrates the basic building blocks required.
 
+### Creating a new feature
+
+![Feature branch](images/feature_branch.drawio.png)
+
+
+
+### Releasing a new feature
+
+![Release feature](images/dev_prod.drawio.png)
+
 ## Why OpenShift?
 
 Simple because we can and OpenShift provides an easy way of setting up
