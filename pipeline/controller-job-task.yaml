@@ -1,0 +1,53 @@
+#  tkn t start controller-jobtemplate -p controller-url=http://ctrl-service.ansible-automation-platform -p controller-jobtemplate='Pipeline%20-%20SOE%20-%20Feature%20environment++Pipeline' -p controller-token-secret=automation-controller-token -p controller-jobtemplate-args='{ "extra_vars": { "git_branch_name": "feature/new", "git_repo_url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection", "action": "create" }}'
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: controller-jobtemplate
+  namespace: ansible-pipeline
+  labels:
+    app.kubernetes.io/version: "0.1"
+spec:
+  description: >-
+    Trigger an Automation Controller job via curl
+  params:
+    - name: controller-token-secret
+      description: Secret storing the Automation Controller token
+      default: ansible-controller-token
+    - name: controller-url
+      description: URL to reach Automation Controller
+    - name: controller-jobtemplate
+      description: Name of job template to trigger
+    - name: controller-jobtemplate-args
+      description: Name of job template to trigger
+  steps:
+    - name: job-template
+      image: registry.access.redhat.com/ubi9/ubi:latest
+      env:
+      - name: WORKSPACE_OUTPUT_PATH
+        value: $(workspaces.output.path)
+      - name: CONTROLLER_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: $(params.controller-token-secret)
+            key: token
+      - name: CONTROLLER_URL
+        value: $(params.controller-url)
+      - name: CONTROLLER_JOBTEMPLATE
+        value: $(params.controller-jobtemplate)
+      - name: CONTROLLER_JOBTEMPLATE_ARGS
+        value: $(params.controller-jobtemplate-args)
+      script: |
+        #!/usr/bin/env sh
+
+        set -eu -o pipefail
+
+        echo "Token                    : ${CONTROLLER_TOKEN}"
+        echo "Automation Controller URL: ${CONTROLLER_URL}"
+        echo "Template                 : ${CONTROLLER_JOBTEMPLATE}"
+        echo "Template arguments       : ${CONTROLLER_JOBTEMPLATE_ARGS}"
+
+        /usr/bin/curl -k --trace-ascii - -XPOST \
+          -H "Authorization: Bearer ${CONTROLLER_TOKEN}" \
+          -H 'Content-Type: application/json' \
+          "${CONTROLLER_URL}/api/v2/job_templates/${CONTROLLER_JOBTEMPLATE}/launch/" \
+          -d "${CONTROLLER_JOBTEMPLATE_ARGS}"

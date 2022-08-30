@@ -10,4 +10,9 @@ spec:
       bindings:
         - ref: gitea-triggerbinding
       template:
-        ref: gitea-triggertemplate
+        ref: feature-environment
+    # - name: trigger
+    #   bindings:
+    #     - ref: gitea-triggerbinding
+    #   template:
+    #     ref: gitea-triggertemplate
