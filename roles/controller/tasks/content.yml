@@ -69,3 +69,17 @@
     controller_password: "{{ controller_password }}"
     controller_host: "{{ controller_url }}"
     validate_certs: no
+
+- name: Create an authentication token
+  ansible.controller.token:
+    description: "Pipeline - authentication token"
+    scope: write
+    controller_username: admin
+    controller_password: "{{ controller_password }}"
+    controller_host: "{{ controller_url }}"
+    validate_certs: no
+  register: controller_token_response
+
+- name: Create a reusable fact with the token
+  ansible.builtin.set_fact:
+    controller_token: "{{ controller_token_response.ansible_facts.controller_token.token }}"

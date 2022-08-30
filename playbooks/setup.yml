@@ -1,9 +1,12 @@
 - name: Setup local cluster
   hosts: localhost
   roles:
+    # Keep the order here!
+    # It's also defined in meta/main.yml
     - gitea
-    - pipeline
     - controller
+    - pipeline
+
   post_tasks:
     - name: Print gitea user credentials if newly registered
       ansible.builtin.debug:
@@ -21,9 +24,14 @@
         - "Ansible Controller user    : admin"
         - "Ansible Controller password: {{ controller_password }}"
         - "Ansible Controller URL     : {{ controller_url }}"
-        - ""
+        - "Ansible Controller Token   : {{ controller_token | default('Undefined: add a subscription') }}"
+      when:
+        - controller_url is defined
+
+    - name: Remember user to add an Ansible Controller subscriptions
+      ansible.builtin.debug:
+        msg:
         - "Go to {{ controller_url }} and add a subscription!"
         - "After adding the subscription execute 'make controller-content"
       when:
-        - controller_url is defined
         - not controller_subscription_installed | bool
