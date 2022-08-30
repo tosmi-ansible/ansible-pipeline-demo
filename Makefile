@@ -14,7 +14,7 @@ help: ## Show this help screen
 #################
 # Setup targets #
 #################
-.PHONY: collections setup pythonlibs
+.PHONY: collections setup pythonlibs verify
 
 pythonlibs: ## Install required python libraries
 	python -m pip install -q -r collections/requirements.txt
@@ -22,17 +22,16 @@ pythonlibs: ## Install required python libraries
 collections: pythonlibs  ## Install required collections
 	ansible-galaxy install -r collections/requirements.yaml
 
-setup: collections ## Run setup playbook
-	ansible-playbook playbooks/setup.yml
-
-.PHONY: verify
 verify:
-	@echo "bla"
+	@oc whoami
+
+setup: verify collections ## Run setup playbook
+	ansible-playbook playbooks/setup.yml
 
 ###################
 # Content targets #
 ###################
-.PHONY: prepare-content
+.PHONY: controller-content
 
 controller-content: ## Prepare Ansible Controller content
 	ansible-playbook playbooks/setup.yml -e controller_subscription_installed=yes
