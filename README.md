@@ -78,21 +78,21 @@ Please see [here](#why-openshift) for an explanation.
 
 The basic idea is to implement the following developer workflow
 
-. Developer checks out git repository with automation code
-. Developer creates feature branch in automation code repository
-. Developer pushes feature branch to central repository
-. Push trigger creates a separate feature environment in Automation Controller for testing the feature branch
-. Developer modifies / extends automation code
-. Developer commits automation code changes and pushes feature branch to Gitea
-. Push triggers a pipeline run that verifies changes with _ansible-lint_
-. Code can also be test by trigging the feature branch environment in Automation Controller
-. If verification is ok, developer can open pull request to *DEV* branch
-. If request is merged, Developer can delete feature branch
-. Feature environment in Controller gets removed
-. Push to *DEV* branch triggers a pipeline that executes a Automation
+1. Developer checks out git repository with automation code
+1. Developer creates feature branch in automation code repository
+1. Developer pushes feature branch to central repository
+1. Push trigger creates a separate feature environment in Automation Controller for testing the feature branch
+1. Developer modifies / extends automation code
+1. Developer commits automation code changes and pushes feature branch to Gitea
+1. Push triggers a pipeline run that verifies changes with _ansible-lint_
+1. Code can also be test by trigging the feature branch environment in Automation Controller
+1. If verification is ok, developer can open pull request to *DEV* branch
+1. If request is merged, Developer can delete feature branch
+1. Feature environment in Controller gets removed
+1. Push to *DEV* branch triggers a pipeline that executes a Automation
    Controller Job Template that executes the code in the *DEV* branch
    on test servers
-. If Job Template execution did *NOT* produce any errors code is
+1. If Job Template execution did *NOT* produce any errors code is
    automatically merged into the *PROD* branch.
 
 This is just a very simple implementation of a possible pipeline but
