@@ -245,7 +245,7 @@ to prepare Ansible Controller for this demo. This will
   - Test feature branch via pipeline and/or Controller jobs
   - Merge feature to main and release
 - Extend testing of playbooks
-  - Use (molecule)[https://molecule.readthedocs.io/en/latest/index.html] in the pipeline
+  - Use [molecule](https://molecule.readthedocs.io/en/latest/index.html) in the pipeline
 
 ## setup.yml options
 
