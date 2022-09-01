@@ -78,20 +78,32 @@ Please see [here](#why-openshift) for an explanation.
 
 The basic idea is to implement the following developer workflow
 
-1. Developer checks out git repository with automation code
-2. Developer creates feature branch in automation code repository
-3. Developer modifies / extends automation code
-4. Developer commits automation code changes and pushes to Gitea
-5. Push triggers a pipeline run that verifies changes with _ansible-lint_
-6. If verification is ok, developer can open pull request do *DEV* branch
-7. Push to *DEV* branch triggers a pipeline that executes a Automation
+. Developer checks out git repository with automation code
+. Developer creates feature branch in automation code repository
+. Developer pushes feature branch to central repository
+. Push trigger creates a separate feature environment in Automation Controller for testing the feature branch
+. Developer modifies / extends automation code
+. Developer commits automation code changes and pushes feature branch to Gitea
+. Push triggers a pipeline run that verifies changes with _ansible-lint_
+. Code can also be test by trigging the feature branch environment in Automation Controller
+. If verification is ok, developer can open pull request to *DEV* branch
+. If request is merged, Developer can delete feature branch
+. Feature environment in Controller gets removed
+. Push to *DEV* branch triggers a pipeline that executes a Automation
    Controller Job Template that executes the code in the *DEV* branch
    on test servers
-8. If Job Template execution did *NOT* produce any errors code is
+. If Job Template execution did *NOT* produce any errors code is
    automatically merged into the *PROD* branch.
 
 This is just a very simple implementation of a possible pipeline but
 we think it demonstrates the basic building blocks required.
+
+What is a feature branch environment in Automation Controller?
+
+This basically means that we create a separate Project in Automation
+Controller that points to the git repository with the feature
+branch. Furthermore we also create a new Job Template that executes code
+in the feature branch on a number of selected hosts.
 
 ### Creating a new feature
 
@@ -225,6 +237,15 @@ to prepare Ansible Controller for this demo. This will
 - Create a development and production project
 - Create one job template to configure development hosts
 - Create one job template to configure production hosts
+
+## Possible improvements to the pipeline
+
+- Work with collections and Automation Hub
+  - Same workflow, create feature branch in collection repo
+  - Test feature branch via pipeline and/or Controller jobs
+  - Merge feature to main and release
+- Extend testing of playbooks
+  - Use (molecule)[https://molecule.readthedocs.io/en/latest/index.html] in the pipeline
 
 ## setup.yml options
 
