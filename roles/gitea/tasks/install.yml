@@ -3,6 +3,15 @@
     name: gitea
     repo_url: https://dl.gitea.io/charts/
 
+- name: Create gitea namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: gitea
+
 - name: Install Gitea via helm
   kubernetes.core.helm:
     name: gitea
