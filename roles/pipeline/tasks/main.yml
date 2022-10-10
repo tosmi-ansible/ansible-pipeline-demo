@@ -29,15 +29,3 @@
     state: present
     src: git-clone.yaml
     namespace: ansible-pipeline
-
-- name: Create secret for accessing Ansible Controller API
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: automation-controller-token
-        namespace: ansible-pipeline
-      data:
-        token: "{{ controller_token | b64encode }}"
