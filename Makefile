@@ -20,6 +20,7 @@ pythonlibs: ## Install required python libraries
 	python -m pip install -q -r collections/requirements.txt
 
 collections: pythonlibs  ## Install required collections
+	@echo "Trying to install required collections..."
 	ansible-galaxy install -r collections/requirements.yaml
 
 verify:
