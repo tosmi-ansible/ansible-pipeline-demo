@@ -21,6 +21,17 @@
     when:
       - gitea_password is not defined
 
+  - name: Store the developer password in a Kubernetes secret
+    kubernetes.core.k8s:
+      state: present
+      definition:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: gitea-developer-password
+        data:
+          password: "{{ gitea_password | b64encode }}"
+
   - name: Create fact for URL with authentication information
     ansible.builtin.set_fact:
       gitea_url_auth: "https://{{ gitea_username}}:{{ gitea_password }}@{{ gitea_route.resources[0].spec.host }}"
@@ -92,3 +103,18 @@
 
   when:
     - not gitea_user_registered
+
+- name: Fetch user token information
+  ansible.builtin.uri:
+    url: "{{ gitea_url}}/api/v1/users/developer/tokens"
+    user: "{{ gitea_username }}"
+    # password: "{{ gitea_password }}"
+    password: "pipeline"
+    force_basic_auth: yes
+    method: GET
+    validate_certs: no
+  register: gitea_developer_tokens
+
+- debug: var=gitea_developer_tokens
+
+- fail:

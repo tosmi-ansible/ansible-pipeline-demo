@@ -25,10 +25,10 @@
     - block:
         - name: Create a project for the feature branch {{ git_branch_name }}
           ansible.controller.project:
-            name: "LINUX - project for feature branch {{ git_branch_name }}"
+            name: "Pipeline - Project for feature branch {{ git_branch_name }}"
             # yamllint disable-line rule:line-length
-            description: "Test environment for feature branch {{ git_branch_name }}"
-            organization: "linux"
+            description: "Environment for feature branch {{ git_branch_name }}"
+            organization: "Pipeline"
             scm_type: git
             scm_url: "{{ tower_webhook_payload.repository.git_http_url }}"
             scm_branch: "{{ git_branch_name }}"
