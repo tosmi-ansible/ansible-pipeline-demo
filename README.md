@@ -19,6 +19,8 @@ The demo is running in OpenShift, for reasons why see [here](#why-openshift).
 * [Prerequisites](#prerequisites)
 * [Infrastructure setup](#infrastructure-setup)
 * [Preparing required content](#preparing-required-content)
+* [Possible improvements to the pipeline](# possible-improvements-to-the-pipeline)
+* [Tips and Tricks](#tips-and-tricks)
 
 ## Motivation
 
@@ -253,4 +255,12 @@ to prepare Ansible Controller for this demo. This will
 ```
 gitea_skip_gitea: [yes|no] Skip Gitea setup
 controller_subscription_installed: [yes|no] Does the Ansible Automation Controller have a valid subscription?
+```
+
+## Tips and Tricks
+
+### Reset the password of the gitea `developer` user
+
+```
+oc exec -n gitea gitea-0 -- gitea  admin user change-password --username developer --password pipeline
 ```
