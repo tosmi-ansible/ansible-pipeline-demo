@@ -10,6 +10,23 @@
     controller_host: "{{ controller_url }}"
     validate_certs: no
 
+- name: Create a GIT credentials for accessing the Gitea repository
+  ansible.controller.credential:
+    name: Pipeline - Gitea token
+    description: Token to access Gitea
+    state: present
+    organization: Pipeline
+    credential_type: "GitHub Personal Access Token"
+    inputs:
+      token: {{ gitea_developer_token}}
+    # controller variables
+    controller_username: admin
+    controller_password: "{{ controller_password }}"
+    controller_host: "{{ controller_url }}"
+    validate_certs: no
+  when:
+    - gitea_developer_token is defined
+
 - name: Create a project for our development branch
   ansible.controller.project:
     name: Pipeline - SOE - DEV
