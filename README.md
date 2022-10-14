@@ -121,16 +121,17 @@ Simple because we can and OpenShift provides an easy way of setting up
 our infrastructure via tools like [Helm](https://helm.io) or
 [Operators](https://operatorhub.io/).
 
-OpenShift is not a strong requirement, any Kubernetes distribution or
-even upstream Kubernetes could also be leveraged.
+OpenShift is not a strong requirement for this demo, any Kubernetes
+distribution or even upstream Kubernetes could also be leveraged (but
+is untested and might eat your beloved cat).
 
 > :warning: **Persistent storage is required**: For Gitea and the
 > Automation Controller you are going to need persistent storage in
 > OpenShift or Kubernetes.
 
 Deploying our pipeline would also be possible without OpenShift. The
-only thing that needs to be replaces is Tekton. But there are plenty
-of tools available for replacement:
+only thing that needs to be replaced is Tekton. There are plenty
+of options available:
 
 - [Jenkins](https://www.jenkins.io) for the classic CI/CD tooling
 - [Gitlab pipelines](https://docs.gitlab.com/ee/ci/pipelines/)
@@ -142,7 +143,7 @@ or various pipelines as a service implementations like
 
 ## Prerequisites
 
-Running the pipeline was tested on an OpenShift 4.10 cluster with
+Running the pipeline was tested on an OpenShift 4.11 cluster with
 [rook-ceph](https://rook.io/) for persistent storage.
 
 Tekton and Ansible Controller are installed via
