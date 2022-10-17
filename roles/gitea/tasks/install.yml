@@ -10,12 +10,12 @@
       apiVersion: v1
       kind: Namespace
       metadata:
-        name: gitea
+        name: "{{ gitea_namespace}}"
 
 - name: Install Gitea via helm
   kubernetes.core.helm:
     name: gitea
-    release_namespace: gitea
+    release_namespace: "{{ gitea_namespace }}"
     chart_ref: gitea/gitea
     chart_version: v6.0.0
     values:
@@ -45,7 +45,7 @@
         labels:
           app: gitea
         name: gitea-https
-        namespace: gitea
+        namespace: "{{ gitea_namespace }}"
       spec:
         host: gitea.apps.ocp.lan.stderr.at
         port:

@@ -6,17 +6,18 @@
     - gitea
     - controller
     - pipeline
+    - integration
 
   post_tasks:
     - name: Print gitea user credentials if newly registered
       ansible.builtin.debug:
         msg:
           - "Gitea user: {{ gitea_username }}"
-          - "Gitea user: {{ gitea_password }}"
+          - "Gitea password: {{ gitea_developer_password }}"
+          - "Gitea token: {{ gitea_developer_token }}"
           - "Gitea URL : {{ gitea_url }}"
       when:
         - not gitea_skip_gitea | bool
-        - not gitea_user_registered | bool
 
     - name: Print Ansible Controller information
       ansible.builtin.debug:

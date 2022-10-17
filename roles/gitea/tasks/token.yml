@@ -1,0 +1,63 @@
+- name: Fetch user token information
+  ansible.builtin.uri:
+    url: "{{ gitea_url}}/api/v1/users/developer/tokens"
+    user: "{{ gitea_username }}"
+    password: "{{ gitea_developer_password }}"
+    force_basic_auth: yes
+    method: GET
+    validate_certs: no
+  register: gitea_developer_tokens
+
+- name: Create developer token if it doesn't exist
+  block:
+
+    - name: Request a new token
+      ansible.builtin.uri:
+        url: "{{ gitea_url}}/api/v1/users/developer/tokens"
+        user: "{{ gitea_username }}"
+        password: "{{ gitea_developer_password }}"
+        force_basic_auth: yes
+        method: POST
+        status_code:
+          - 201
+        body_format: json
+        body: '{ "name": "Ansible Controller Token" }'
+        validate_certs: no
+      register: gitea_created_developer_token
+
+    - name: Create a fact for the developer token
+      ansible.builtin.set_fact:
+        gitea_developer_token: "{{ gitea_created_developer_token.json.sha1 }}"
+
+    - name: Store the developer password in a Kubernetes secret
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: gitea-developer-token
+            namespace: "{{ gitea_namespace }}"
+          data:
+            token: "{{ gitea_developer_token | b64encode }}"
+
+  when:
+    - gitea_developer_tokens.json | count == 0
+
+- name: Get developer token
+  block:
+
+  - name: Read the developer token from the corresponding K8s secret
+    kubernetes.core.k8s_info:
+      api_version: v1
+      kind: Secret
+      name: gitea-developer-token
+      namespace: "{{ gitea_namespace }}"
+    register: gitea_developer_token_secret
+
+  - name: Register fact gitea_developer_token
+    ansible.builtin.set_fact:
+      gitea_developer_token: "{{ gitea_developer_token_secret.resources[0].data.token | b64decode}}"
+
+  when:
+    - gitea_developer_tokens.json | count > 0

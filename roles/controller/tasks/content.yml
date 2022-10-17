@@ -18,7 +18,7 @@
     organization: Pipeline
     credential_type: "GitHub Personal Access Token"
     inputs:
-      token: {{ gitea_developer_token}}
+      token: "{{ gitea_developer_token }}"
     # controller variables
     controller_username: admin
     controller_password: "{{ controller_password }}"
