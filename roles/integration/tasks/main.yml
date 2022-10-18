@@ -1,25 +1,3 @@
 ---
 # tasks file for integration
-
-- name: Query Gitea webhook
-  ansible.builtin.uri:
-    url: "{{ gitea_url}}/api/v1/repos/developer/ansible-example-collection/hooks"
-    user: "{{ gitea_username }}"
-    password: "{{ gitea_developer_password }}"
-    force_basic_auth: yes
-    method: GET
-    validate_certs: no
-
-- name: Create Webhook to trigger Ansible Controller Job for creating feature environments
-  ansible.builtin.uri:
-    url: "{{ gitea_url}}/api/v1/repos/developer/ansible-example-collection/hooks"
-    user: "{{ gitea_username }}"
-    password: "{{ gitea_developer_password }}"
-    force_basic_auth: yes
-    method: POST
-    status_code:
-      - 201
-    body_format: json
-    body: "{{ lookup('ansible.builtin.template','gitea-controller-webhook.json.j2') }}"
-    validate_certs: no
-  register: integration_create_webhook
+- ansible.builtin.include_tasks: gitea.yml
