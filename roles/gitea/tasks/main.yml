@@ -4,11 +4,11 @@
 
 # The Gitea URL is also used in the controller role
 - name: Get Gitea URL from OpenShift
-  community.kubernetes.k8s_info:
+  kubernetes.core.k8s_info:
     api_version: route.openshift.io/v1
     kind: Route
     name: gitea-https
-    namespace: gitea
+    namespace: "{{ gitea_namespace }}"
   register: gitea_route
 
 - name: Create fact for the route URL

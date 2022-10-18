@@ -17,13 +17,25 @@
 
   - name: Generate a password for the gitea user {{ gitea_username }} if not specified
     ansible.builtin.set_fact:
-      gitea_password: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
+      gitea_developer_password: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
     when:
-      - gitea_password is not defined
+      - gitea_developer_password is not defined
+
+  - name: Store the developer password in a Kubernetes secret
+    kubernetes.core.k8s:
+      state: present
+      definition:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: gitea-developer-password
+          namespace: "{{ gitea_namespace }}"
+        data:
+          password: "{{ gitea_developer_password | b64encode }}"
 
   - name: Create fact for URL with authentication information
     ansible.builtin.set_fact:
-      gitea_url_auth: "https://{{ gitea_username}}:{{ gitea_password }}@{{ gitea_route.resources[0].spec.host }}"
+      gitea_url_auth: "https://{{ gitea_username}}:{{ gitea_developer_password }}@{{ gitea_route.resources[0].spec.host }}"
 
   - name: Create a gitea user
     ansible.builtin.uri:
@@ -33,8 +45,8 @@
       body:
         user_name: "{{ gitea_username }}"
         email: "{{ gitea_email}}"
-        password: "{{ gitea_password}}"
-        retype: "{{ gitea_password }}"
+        password: "{{ gitea_developer_password}}"
+        retype: "{{ gitea_developer_password }}"
       status_code:
         - 303 # user sucessfully created
       validate_certs: no
@@ -54,7 +66,7 @@
     ansible.builtin.uri:
       url: "{{ gitea_url}}/api/v1/user/repos"
       user: "{{ gitea_username }}"
-      password: "{{ gitea_password }}"
+      password: "{{ gitea_developer_password }}"
       force_basic_auth: yes
       method: POST
       status_code:
@@ -92,3 +104,23 @@
 
   when:
     - not gitea_user_registered
+
+- name: Get developer information
+  block:
+
+  - name: Read the developer password from the corresponding K8s secret
+    kubernetes.core.k8s_info:
+      api_version: v1
+      kind: Secret
+      name: gitea-developer-password
+      namespace: "{{ gitea_namespace }}"
+    register: gitea_developer_password_secret
+
+  - name: Register fact gitea_developer_password
+    ansible.builtin.set_fact:
+      gitea_developer_password: "{{ gitea_developer_password_secret.resources[0].data.password | b64decode}}"
+
+  when:
+    - gitea_user_registered
+
+- ansible.builtin.include_tasks: token.yml

@@ -10,6 +10,23 @@
     controller_host: "{{ controller_url }}"
     validate_certs: no
 
+- name: Create a GIT credentials for accessing the Gitea repository
+  ansible.controller.credential:
+    name: Pipeline - Gitea token
+    description: Token to access Gitea
+    state: present
+    organization: Pipeline
+    credential_type: "GitHub Personal Access Token"
+    inputs:
+      token: "{{ gitea_developer_token }}"
+    # controller variables
+    controller_username: admin
+    controller_password: "{{ controller_password }}"
+    controller_host: "{{ controller_url }}"
+    validate_certs: no
+  when:
+    - gitea_developer_token is defined
+
 - name: Create a project for our development branch
   ansible.controller.project:
     name: Pipeline - SOE - DEV
@@ -70,6 +87,22 @@
     controller_host: "{{ controller_url }}"
     validate_certs: no
 
+- name: Create a job template for configuring feature environments
+  ansible.controller.job_template:
+    name: Pipeline - Gitea Webhook
+    description: Used to create new feature environments
+    state: present
+    organization: Pipeline
+    project: "Pipeline - SOE - DEV"
+    playbook: "playbooks/feature-environment-webhook.yml"
+    inventory: "Demo Inventory"
+    # controller variables
+    controller_username: admin
+    controller_password: "{{ controller_password }}"
+    controller_host: "{{ controller_url }}"
+    validate_certs: no
+    webhook_service: github
+
 - name: Check if secret for accessing Ansible Controller already exists
   kubernetes.core.k8s_info:
     api_version: v1
@@ -87,30 +120,30 @@
 - name: Create controller token and secret
   block:
 
-    - name: Create an authentication token
-      ansible.controller.token:
-        description: "Pipeline - authentication token"
-        scope: write
-        controller_username: admin
-        controller_password: "{{ controller_password }}"
-        controller_host: "{{ controller_url }}"
-        validate_certs: no
-      register: controller_token_response
+  - name: Create an authentication token
+    ansible.controller.token:
+      description: "Pipeline - authentication token"
+      scope: write
+      controller_username: admin
+      controller_password: "{{ controller_password }}"
+      controller_host: "{{ controller_url }}"
+      validate_certs: no
+    register: controller_token_response
 
-    - name: Create a reusable fact with the token
-      ansible.builtin.set_fact:
-        controller_token: "{{ controller_token_response.ansible_facts.controller_token.token }}"
+  - name: Create a reusable fact with the token
+    ansible.builtin.set_fact:
+      controller_token: "{{ controller_token_response.ansible_facts.controller_token.token }}"
 
-    - name: Create secret for accessing Ansible Controller API
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: automation-controller-token
-            namespace: ansible-pipeline
-          data:
-            token: "{{ controller_token | b64encode }}"
+  - name: Create secret for accessing Ansible Controller API
+    kubernetes.core.k8s:
+      state: present
+      definition:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: automation-controller-token
+          namespace: ansible-pipeline
+        data:
+          token: "{{ controller_token | b64encode }}"
   when:
     - controller_token_check.resources | length == 0

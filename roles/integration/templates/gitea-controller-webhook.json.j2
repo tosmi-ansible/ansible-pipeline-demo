@@ -1,0 +1,13 @@
+{
+    "active": true,
+    "branch_filter": "feature/*",
+    "config": {
+	"content_type": "json",
+	"url": "http://ctrl-service.ansible-automation-platform.svc.cluster.local/api/v2/job_templates/Pipeline - Gitea Webhook++Pipeline/github/",
+	"secret": "{{ integration_controller_webhook_key }}"
+    },
+    "events": [
+	"push"
+    ],
+    "type": "gitea"
+}
