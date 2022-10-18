@@ -123,5 +123,4 @@
   when:
     - gitea_user_registered
 
-
 - ansible.builtin.include_tasks: token.yml
