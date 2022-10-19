@@ -25,7 +25,7 @@
         - "Ansible Controller user    : admin"
         - "Ansible Controller password: {{ controller_password }}"
         - "Ansible Controller URL     : {{ controller_url }}"
-        - "Ansible Controller Token   : {{ controller_token | default('Undefined: add a subscription') }}"
+        - "Ansible Controller Token   : {{ controller_oauthtoken | default('Undefined: add a subscription') }}"
       when:
         - controller_url is defined
 
