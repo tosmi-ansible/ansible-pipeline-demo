@@ -1,0 +1,44 @@
+- name: Check if secret for accessing Ansible Controller already exists
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: automation-controller-oauthtoken
+    namespace: ansible-pipeline
+  register: controller_oauthtoken_check
+
+- name: Create a reusable fact with the oauthtoken
+  ansible.builtin.set_fact:
+    controller_oauthtoken: "{{ controller_oauthtoken_check.resources[0].data.token | b64decode }}"
+  when:
+    - controller_oauthtoken_check.resources | length > 0
+
+- name: Create controller oauthtoken and secret
+  block:
+
+  - name: Create an authentication oauthtoken
+    ansible.controller.token:
+      description: "Pipeline - authentication token"
+      scope: write
+      controller_username: admin
+      controller_password: "{{ controller_password }}"
+      controller_host: "{{ controller_url }}"
+      validate_certs: no
+    register: controller_oauthtoken_response
+
+  - name: Create a reusable fact with the token
+    ansible.builtin.set_fact:
+      controller_oauthtoken: "{{ controller_oauthtoken_response.ansible_facts.controller_token.token }}"
+
+  - name: Create secret for accessing Ansible Controller API
+    kubernetes.core.k8s:
+      state: present
+      definition:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: automation-controller-token
+          namespace: ansible-pipeline
+        data:
+          oauthtoken: "{{ controller_oauthtoken | b64encode }}"
+  when:
+    - controller_oauthtoken_check.resources | length == 0
