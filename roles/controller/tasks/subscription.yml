@@ -25,5 +25,5 @@
 
     - name: Fail if we need a subscription
       ansible.builtin.fail:
-        msg: "Failing because you need to add subscription to the controller, to login see the message above"
+        msg: "Failing because you need to add subscription to the controller, for logging into the controller the message above. Run 'make setup' again after adding a subscription!"
   when: not controller_subscription_installed

@@ -23,7 +23,6 @@
     validate_certs: no
   register: integration_controller_webhook_key_query
 
-- debug: var=integration_controller_webhook_key_query
 - name: Register fact with webhook key
   ansible.builtin.set_fact:
     integration_controller_webhook_key: "{{ integration_controller_webhook_key_query.json.webhook_key }}"
