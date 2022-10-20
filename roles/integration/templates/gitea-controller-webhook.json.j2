@@ -7,7 +7,12 @@
 	"secret": "{{ integration_controller_webhook_key }}"
     },
     "events": [
-	"push"
+        ## Disabled push events for now, we are currently only interested
+        ## creating and deleting the feature branch
+	## "push",
+	"create",
+	"delete"
+
     ],
     "type": "gitea"
 }
