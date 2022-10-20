@@ -1,37 +1,29 @@
+#
+# On monday we install automation controller
+#
+# This also defines some basic facts for connecting to the controller
+# - controller_url
+# - controller_password
+#
 - include_tasks: install.yml
 
-- name: Get Automation Controller admin credentials
-  community.kubernetes.k8s_info:
-    api_version: v1
-    kind: Secret
-    name: ctrl-admin-password
-    namespace: ansible-automation-platform
-  register: controller_password_secret
+#
+# Check the state of the subscription
+#
+# This will fail if no subscription is available
+#
+- include_tasks: subscription.yml
 
-- name: Get Controller URL from OpenShift
-  community.kubernetes.k8s_info:
-    api_version: route.openshift.io/v1
-    kind: Route
-    name: ctrl
-    namespace: ansible-automation-platform
-  register: controller_route
+#
+# First we need a authentication token
+#
+- include_tasks: token.yml
 
-- name: Register fact with controller password
-  ansible.builtin.set_fact:
-    controller_password: "{{ controller_password_secret.resources[0].data.password | b64decode }}"
-    controller_url: "https://{{ controller_route.resources[0].spec.host }}"
-
-- name: Disable SSL verifcation for GIT in controller
-  ansible.controller.settings:
-    name: AWX_TASK_ENV
-    value:
-      GIT_SSL_NO_VERIFY: "True"
-      HOME: "/var/lib/awx"
-    # controller variables
-    controller_username: admin
-    controller_password: "{{ controller_password }}"
-    controller_host: "{{ controller_url }}"
-    validate_certs: no
-
+#
+# Now we can add all required content
+#
+# - Projects
+# - Job Templates
+#
 - include_tasks: content.yml
   when: controller_subscription_installed
