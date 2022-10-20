@@ -1,20 +1,22 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: feature-environment
+  name: ansible-staging
   namespace: ansible-pipeline
 spec:
   params:
     - name: git-repository-url
       description: The git repository url
+    - name: git-ref
+      description: The ref that triggered this run
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        generateName: feature-environment-
+        generateName: ansible-staging-
       spec:
         pipelineRef:
-          name: feature-environment
+          name: ansible-staging
         params:
           - name: repository
             value: $(tt.params.git-repository-url)
