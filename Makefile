@@ -29,14 +29,6 @@ verify:
 setup: verify collections ## Run setup playbook
 	ansible-playbook playbooks/setup.yml
 
-###################
-# Content targets #
-###################
-.PHONY: controller-content
-
-controller-content: ## Prepare Ansible Controller content
-	ansible-playbook playbooks/setup.yml -e controller_subscription_installed=yes
-
 ##################
 # Helper targets #
 ##################
