@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: ansible-lint
+  name: ansible-staging
   namespace: ansible-pipeline
 spec:
   workspaces:
