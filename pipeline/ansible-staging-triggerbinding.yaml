@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: gitea-triggerbinding
+  name: ansible-staging-triggerbinding
   namespace: ansible-pipeline
 spec:
   params:

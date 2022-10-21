@@ -1,10 +1,10 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  generateName: ansible-lint-
+  generateName: ansible-stating-
 spec:
   pipelineRef:
-    name: ansible-lint
+    name: ansible-staging
   # params:
   #   - name: repository
   #     value: $(tt.params.git-repository-url)
@@ -17,3 +17,6 @@ spec:
           resources:
             requests:
               storage: 200Mi
+    - name: gitcredentials-ws
+      secret:
+        secretName: ansible-staging-gitcredentials

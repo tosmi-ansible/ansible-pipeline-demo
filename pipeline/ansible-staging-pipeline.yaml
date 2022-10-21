@@ -6,16 +6,19 @@ metadata:
 spec:
   workspaces:
     - name: ansible-lint-ws
+    - name: gitcredentials-ws
   tasks:
     - name: git-clone
       params:
         - name: url
-          value: http://user:passw0rd@gitea-http.gitea:3000/tosmi/ansible.git
+          value: http://gitea-http.gitea:3000/tosmi/ansible-example-collection.git
       taskRef:
         name: git-clone
       workspaces:
         - name: output
           workspace: ansible-lint-ws
+        - name: basic-auth
+          workspace: gitcredentials-ws
     - name: ansible-lint
       taskRef:
         name: ansible-lint

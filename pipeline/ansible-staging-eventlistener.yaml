@@ -1,14 +1,14 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: gitea-listener
+  name: ansible-staging
   namespace: ansible-pipeline
 spec:
   serviceAccountName: pipeline
   triggers:
     - name: trigger
       bindings:
-        - ref: gitea-triggerbinding
+        - ref: ansible-staging-triggerbinding
       template:
         ref: ansible-staging
     # - name: trigger

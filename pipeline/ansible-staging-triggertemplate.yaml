@@ -20,9 +20,21 @@ spec:
         params:
           - name: repository
             value: $(tt.params.git-repository-url)
-          - name: before
-            value: $(tt.params.git-revision.before)
-          - name: after
-            value: $(tt.params.git-revision.after)
+          # - name: before
+          #   value: $(tt.params.git-revision.before)
+          # - name: after
+          #   value: $(tt.params.git-revision.after)
           - name: ref
             value: $(tt.params.git-ref)
+        workspaces:
+          - name: ansible-lint-ws
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 200Mi
+          - name: gitcredentials-ws
+            secret:
+              secretName: ansible-staging-gitcredentials
