@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-merge
+  namespace: ansible-pipeline
+  labels:
+    app.kubernetes.io/version: "0.1"
+spec:
+  description: >-
+    Merge main branch to development
+  workspaces:
+    - name: output
+      description: Directory containing the checked out ansible code repository
+  params:
+    - name: sourcebranch
+      description: Branch to merge from
+      type: string
+      default: "main"
+    - name: destinationbranch
+      description: Branch to merge from
+      type: string
+      default: "development"
+    - name: push
+      description: Push branch after merging
+      type: string
+      default: "true"
+  steps:
+    - name: merge
+      image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.29.0
+      env:
+      - name: WORKSPACE_OUTPUT_PATH
+        value: $(workspaces.output.path)
+      - name: SOURCE_BRANCH
+        value: $(params.sourcebranch)
+      - name: DESTINATION_BRANCH
+        value: $(params.destinationbranch)
+      - name: PUSH
+        value: $(params.push)
+      script: |
+        #!/usr/bin/env sh
+
+        set -eu -o pipefail
+
+        set -x
+
+        # silence fatal: detected dubious ownership in repository at
+        # '/workspace/output' messages. '/workspace/output' is owned
+        # by root.
+        /usr/bin/git config --global --add safe.directory /workspace/output
+
+        cd "$WORKSPACE_OUTPUT_PATH" || exit 1
+
+        echo "Merging ${SOURCE_BRANCH} into ${DESTINATION_BRANCH} in ${WORKSPACE_OUTPUT_PATH}"
+        /usr/bin/git checkout development
+        /usr/bin/git merge main
+        /usr/bin/git remote -v
+        /usr/bin/git push origin development
