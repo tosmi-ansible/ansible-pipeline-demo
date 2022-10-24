@@ -66,7 +66,7 @@
     state: present
     organization: Pipeline
     project: "Pipeline - SOE - DEV"
-    playbook: "playbooks/linux-soe.yml"
+    playbook: "linux-soe.yml"
     inventory: "Demo Inventory"
     # controller variables
     controller_username: admin
@@ -81,7 +81,7 @@
     state: present
     organization: Pipeline
     project: "Pipeline - SOE - PROD"
-    playbook: "playbooks/linux-soe.yml"
+    playbook: "linux-soe.yml"
     inventory: "Demo Inventory"
     # controller variables
     controller_username: admin
