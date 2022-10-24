@@ -96,7 +96,7 @@
     state: present
     organization: Pipeline
     project: "Pipeline - SOE - DEV"
-    playbook: "playbooks/feature-environment-webhook.yml"
+    playbook: "feature-environment-webhook.yml"
     inventory: "Demo Inventory"
     # controller variables
     controller_username: admin
