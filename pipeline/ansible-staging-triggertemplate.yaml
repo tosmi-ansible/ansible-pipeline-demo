@@ -35,6 +35,6 @@ spec:
                 resources:
                   requests:
                     storage: 200Mi
-          - name: gitcredentials-ws
+          - name: git-credentials-ws
             secret:
-              secretName: ansible-staging-gitcredentials
+              secretName: ansible-staging-git-basic-auth

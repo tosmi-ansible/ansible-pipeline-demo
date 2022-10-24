@@ -1,8 +1,9 @@
-#  tkn t start controller-jobtemplate -p controller-url=http://ctrl-service.ansible-automation-platform -p controller-jobtemplate='Pipeline%20-%20SOE%20-%20Feature%20environment++Pipeline' -p controller-token-secret=automation-controller-token -p controller-jobtemplate-args='{ "extra_vars": { "git_branch_name": "feature/new", "git_repo_url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection", "action": "create" }}'
+---
+
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: controller-jobtemplate
+  name: controller-job
   namespace: ansible-pipeline
   labels:
     app.kubernetes.io/version: "0.1"
@@ -10,44 +11,177 @@ spec:
   description: >-
     Trigger an Automation Controller job via curl
   params:
+    - name: verbose
+      description: "Log commands that are executed during merge operation."
+      type: string
+      default: "true"
     - name: controller-token-secret
       description: Secret storing the Automation Controller token
-      default: ansible-controller-token
+      default: automation-controller-token
     - name: controller-url
       description: URL to reach Automation Controller
-    - name: controller-jobtemplate
+    - name: controller-job-name
       description: Name of job template to trigger
-    - name: controller-jobtemplate-args
-      description: Name of job template to trigger
+    - name: controller-job-args
+      description: Extra arguments for the job
+      default: ""
+    - name: controller-workflow
+      description: If we would like to trigger a workflow
+      default: "false"
   steps:
     - name: job-template
-      image: registry.access.redhat.com/ubi9/ubi:latest
+      image: quay.io/tosmi/ubi9-utils:latest
       env:
-      - name: WORKSPACE_OUTPUT_PATH
-        value: $(workspaces.output.path)
+      - name: PARAM_VERBOSE
+        value: $(params.verbose)
       - name: CONTROLLER_TOKEN
         valueFrom:
           secretKeyRef:
             name: $(params.controller-token-secret)
             key: token
-      - name: CONTROLLER_URL
+      - name: CONTROLLER_BASE_URL
         value: $(params.controller-url)
-      - name: CONTROLLER_JOBTEMPLATE
-        value: $(params.controller-jobtemplate)
+      - name: CONTROLLER_JOB_NAME
+        value: $(params.controller-job-name)
       - name: CONTROLLER_JOBTEMPLATE_ARGS
-        value: $(params.controller-jobtemplate-args)
+        value: $(params.controller-job-args)
+      - name: CONTROLLER_WORKFLOW
+        value: $(params.controller-workflow)
       script: |
-        #!/usr/bin/env sh
+        #!/bin/bash
 
         set -eu -o pipefail
 
-        echo "Token                    : ${CONTROLLER_TOKEN}"
-        echo "Automation Controller URL: ${CONTROLLER_URL}"
-        echo "Template                 : ${CONTROLLER_JOBTEMPLATE}"
-        echo "Template arguments       : ${CONTROLLER_JOBTEMPLATE_ARGS}"
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+            set -x
+        fi
 
-        /usr/bin/curl -k --trace-ascii - -XPOST \
-          -H "Authorization: Bearer ${CONTROLLER_TOKEN}" \
-          -H 'Content-Type: application/json' \
-          "${CONTROLLER_URL}/api/v2/job_templates/${CONTROLLER_JOBTEMPLATE}/launch/" \
-          -d "${CONTROLLER_JOBTEMPLATE_ARGS}"
+        PATH=/bin:/usr/bin
+
+        CONTROLLER_BASE_URL=${CONTROLLER_BASE_URL:-}
+        CONTROLLER_TOKEN=${CONTROLLER_TOKEN:-}
+        CONTROLLER_JOB_ID=${CONTROLLER_JOB_ID:-}
+        CONTROLLER_JOB_NAME=${CONTROLLER_JOB_NAME:-}
+        CONTROLLER_JOB_ARGS=${CONTROLLER_JOB_ARGS:-}
+        CONTROLLER_WORKFLOW=${CONTROLLER_WORKFLOW:-}
+
+        if [ "${CONTROLLER_WORKFLOW}" == "yes" ]; then
+            CONTROLLER_JOB_URL="workflow_job_templates"
+        else
+            CONTROLLER_JOB_URL="job_templates"
+        fi
+
+        SLEEP=${SLEEP:-5}
+
+        RED="\e[31m"
+        YELLOW="\e[33m"
+        BOLD="\033[1m"
+        NC="\e[0m"
+
+        error() {
+            local MESSAGE="$1"
+            local DATE
+
+            DATE=$(date "+%d/%b/%Y:%H:%M:%S %z")
+
+            # shellcheck disable=SC3037
+            echo -e "[${DATE}] ${RED}ERROR:${NC} $MESSAGE" >&2
+            exit 1
+        }
+
+        info() {
+            local MESSAGE="$1"
+            local DATE
+
+            DATE=$(date "+%d/%b/%Y:%H:%M:%S %z")
+
+            # shellcheck disable=SC3037
+            echo -e "[${DATE}] ${YELLOW}INFO:${NC} $MESSAGE" >&2
+
+            return 0
+        }
+
+        run_job() {
+            info "Using Ansible Controller at ${BOLD}${CONTROLLER_BASE_URL}${NC}"
+            info "Triggering Job template ${BOLD}${CONTROLLER_JOB_NAME}${NC}}"
+
+            CONTROLLER_JOB_NAME_URI_ESCAPED=${CONTROLLER_JOB_NAME// /%20}
+
+            JOB_URL=$(curl -qsk -H "Accept: application/json" -H "Authorization: Bearer $CONTROLLER_TOKEN" -X POST "${CONTROLLER_BASE_URL}/api/v2/${CONTROLLER_JOB_URL}/${CONTROLLER_JOB_NAME_URI_ESCAPED}/launch/" | /bin/jq -r .url)
+
+            [ "$JOB_URL" = "" ] && error "Trigger job ${CONTROLLER_JOB_NAME} failed!"
+            [ "$JOB_URL" = "null" ] && error "Trigger job ${CONTROLLER_JOB_NAME} failed!"
+
+            info "Job successfully triggered!"
+            info "Job URL is ${JOB_URL}"
+            echo "$JOB_URL"
+        }
+
+        verify() {
+            [ -z "$CONTROLLER_BASE_URL" ] && error "Environment variable ${BOLD}CONTROLLER_BASE_URL${NC} is not defined"
+            [ -z "$CONTROLLER_TOKEN" ] && error "Environment variable ${BOLD}CONTROLLER_TOKEN${NC} is not defined"
+            [ -z "$CONTROLLER_JOB_NAME" ] && error "Environment variable ${BOLD}CONTROLLER_JOB_NAME{NC} is not defined"
+
+            return 0
+        }
+
+        wait_for_job() {
+            local JOB_URL="$1"
+            local JOB_STATE
+
+            JOB_FULL_URL="${CONTROLLER_BASE_URL}${JOB_URL}"
+
+            info "Waiting for job ${BOLD}$JOB_URL${NC} to finish..."
+            while true; do
+        	JOB_STATE=$(curl -qsk -H "Accept: application/json" -H "Authorization: Bearer $CONTROLLER_TOKEN" -X GET "${JOB_FULL_URL}" | /bin/jq -r .status)
+
+        	case "$JOB_STATE" in
+        	    pending|waiting|running)
+        		info "Job ${BOLD}${JOB_URL}${NC} is in state ${BOLD}${JOB_STATE}${NC}..."
+        		;;
+        	    failed)
+        		error "Job ${BOLD}${JOB_URL}${NC} failed!"
+        		;;
+        	    canceled)
+        		error "Job ${BOLD}${JOB_URL}${NC} was canceled!"
+        		;;
+        	    successful)
+        		info "Job ${BOLD}$JOB_URL${NC} successfully finished"
+        		return 0
+        		;;
+        	    *)
+        		error "Unkown job status ${BOLD}${JOB_STATE}${NC} for job ${BOLD}${JOB_URL}${NC}!"
+        	esac
+
+        	sleep "${SLEEP}"
+            done
+        }
+
+        get_tower_jobs_name_by_id() {
+            local JOB_ID
+            local JOB_NAME
+
+            JOB_ID="$1"
+            JOB_NAME=$(curl -qsk -H "Accept: application/json" -H "Authorization: Bearer $CONTROLLER_TOKEN" -X GET "${CONTROLLER_BASE_URL}/api/v2/${CONTROLLER_JOB_URL}/${JOB_ID}/" | /bin/jq -r .name)
+
+            echo "${JOB_NAME}"
+        }
+
+        main() {
+            info "Token                    : ${CONTROLLER_TOKEN}"
+            info "Automation Controller URL: ${CONTROLLER_BASE_URL}"
+            info "Template                 : ${CONTROLLER_JOB_NAME}"
+            info "Template arguments       : ${CONTROLLER_JOB_ARGS}"
+
+            if [ -n "$CONTROLLER_JOB_ID" ] && [ -z "$CONTROLLER_JOB_NAME" ]; then
+        	CONTROLLER_JOB_NAME=$(get_tower_jobs_name_by_id "$CONTROLLER_JOB_ID")
+            fi
+
+            # URL Escape the job name in case it contains blanks
+            # CONTROLLER_JOB_NAME=$(echo "$CONTROLLER_JOB_NAME" | sed 's/ /%20/g')
+            JOB_URL=$(run_job "$CONTROLLER_JOB_NAME")
+            wait_for_job "$JOB_URL"
+        }
+
+        verify
+        main

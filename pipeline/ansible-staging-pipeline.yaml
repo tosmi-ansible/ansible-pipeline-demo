@@ -6,7 +6,7 @@ metadata:
 spec:
   workspaces:
     - name: ansible-lint-ws
-    - name: gitcredentials-ws
+    - name: git-credentials-ws
   tasks:
     - name: git-clone
       params:
@@ -22,7 +22,7 @@ spec:
         - name: output
           workspace: ansible-lint-ws
         - name: basic-auth
-          workspace: gitcredentials-ws
+          workspace: git-credentials-ws
     - name: ansible-lint
       taskRef:
         name: ansible-lint
@@ -37,5 +37,27 @@ spec:
       workspaces:
         - name: output
           workspace: ansible-lint-ws
+        - name: basic-auth
+          workspace: git-credentials-ws
       runAfter:
         - ansible-lint
+    - name: controller-job
+      params:
+        - name: controller-url
+          value: http://ctrl-service.ansible-automation-platform
+        - name: controller-job-name
+          value: "Pipeline - SOE - Development hosts"
+      taskRef:
+        name: controller-job
+      runAfter:
+        - git-merge
+    - name: pull-request
+      params:
+        - name: sourceBranch
+          value: developement
+        - name: destinationBranch
+          value: production
+      taskRef:
+        name: pull-request
+      runAfter:
+        - controller-job

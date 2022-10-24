@@ -1,0 +1,64 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: pull-request
+  namespace: ansible-pipeline
+  labels:
+    app.kubernetes.io/version: "0.1"
+spec:
+  description: >-
+    Create a pull request
+  params:
+    - name: verbose
+      description: "Log commands that are executed during merge operation."
+      type: string
+      default: "true"
+    - name: sourceBranch
+      description: Source branch for the merge request
+      type: string
+    - name: destinationBranch
+      description: Destination branch for the merge request
+      type: string
+    - name: giteaTokenSecret
+      description: Destination branch for the merge request
+      type: string
+      default: ""
+  steps:
+    - name: pull-request
+      image: quay.io/tosmi/ubi9-utils:latest
+      env:
+      - name: PARAM_VERBOSE
+        value: $(params.verbose)
+      - name: PARAM_GIT_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: $(params.gitea-developer-token)
+            key: token
+      - name: PARAM_SOURCE_BRANCH
+        value: $(params.sourceBranch)
+      - name: PARAM_DESTINATION_BRANCH
+        value: $(params.destinationBranch)
+
+      script: |
+        #!/bin/bash
+
+        set -eu -o pipefail
+
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+            set -x
+        fi
+
+        PATH=/bin:/usr/bin
+
+        /usr/bin/curl -kv \
+          -H 'Content-Type: application/json' \
+          -H "Authorization: Bearer ${PARAM_GIT_TOKEN}"
+          https://gitea.apps.ocp.lan.stderr.at/api/v1/repos/developer/ansible-example-collection/pulls && \
+          -d '
+          {
+            "base": "production",
+            "head": "development",
+            "body": "We want to merge into production",
+            "title": "Merge into production"
+          }'

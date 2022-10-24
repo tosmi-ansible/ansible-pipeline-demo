@@ -11,47 +11,102 @@ spec:
   workspaces:
     - name: output
       description: Directory containing the checked out ansible code repository
+    - name: basic-auth
+      optional: true
+      description: |
+        A Workspace containing a .gitconfig and .git-credentials file. These
+        will be copied to the user's home before any git commands are run. Any
+        other files in this Workspace are ignored. It is strongly recommended
+        to use ssh-directory over basic-auth whenever possible and to bind a
+        Secret to this Workspace over other volume types.
   params:
     - name: sourcebranch
       description: Branch to merge from
       type: string
       default: "main"
     - name: destinationbranch
-      description: Branch to merge from
+      description: Branch to merge to
       type: string
       default: "development"
+    - name: gitUserName
+      type: string
+      description: |
+        Git user name for performing git operation.
+      default: "Tekton Pipeline"
+    - name: gitUserEmail
+      type: string
+      description: |
+        Git user email for performing git operation.
+      default: "donotreply@ansible-pipeline.dev"
     - name: push
       description: Push branch after merging
       type: string
       default: "true"
+    - name: verbose
+      description: "Log commands that are executed during merge operation."
+      type: string
+      default: "true"
+    - name: userHome
+      description: |
+        Absolute path to the user's home directory.
+      type: string
+      default: "/root"
   steps:
     - name: merge
       image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.29.0
       env:
       - name: WORKSPACE_OUTPUT_PATH
         value: $(workspaces.output.path)
-      - name: SOURCE_BRANCH
+      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND
+        value: $(workspaces.basic-auth.bound)
+      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_PATH
+        value: $(workspaces.basic-auth.path)
+      - name: PARAM_VERBOSE
+        value: $(params.verbose)
+      - name: PARAM_SOURCE_BRANCH
         value: $(params.sourcebranch)
-      - name: DESTINATION_BRANCH
+      - name: PARAM_DESTINATION_BRANCH
         value: $(params.destinationbranch)
-      - name: PUSH
+      - name: PARAM_USER_HOME
+        value: $(params.userHome)
+      - name: PARAM_GIT_USER_NAME
+        value: $(params.gitUserName)
+      - name: PARAM_GIT_USER_EMAIL
+        value: $(params.gitUserEmail)
+      - name: PARAM_PUSH
         value: $(params.push)
       script: |
         #!/usr/bin/env sh
-
         set -eu -o pipefail
 
-        set -x
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
+
+        if [ "${WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND}" = "true" ] ; then
+          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.git-credentials" "${PARAM_USER_HOME}/.git-credentials"
+          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.gitconfig" "${PARAM_USER_HOME}/.gitconfig"
+          chmod 400 "${PARAM_USER_HOME}/.git-credentials"
+          chmod 400 "${PARAM_USER_HOME}/.gitconfig"
+        fi
 
         # silence fatal: detected dubious ownership in repository at
         # '/workspace/output' messages. '/workspace/output' is owned
         # by root.
         /usr/bin/git config --global --add safe.directory /workspace/output
 
+        # Setting up the config for the git.
+        git config --global user.email "$PARAM_GIT_USER_EMAIL"
+        git config --global user.name "$PARAM_GIT_USER_NAME"
+
         cd "$WORKSPACE_OUTPUT_PATH" || exit 1
 
-        echo "Merging ${SOURCE_BRANCH} into ${DESTINATION_BRANCH} in ${WORKSPACE_OUTPUT_PATH}"
-        /usr/bin/git checkout development
-        /usr/bin/git merge main
+        echo "Merging ${PARAM_SOURCE_BRANCH} into ${PARAM_DESTINATION_BRANCH} in ${WORKSPACE_OUTPUT_PATH}"
+        /usr/bin/git fetch
+        /usr/bin/git checkout "$PARAM_DESTINATION_BRANCH"
+        /usr/bin/git merge "$PARAM_SOURCE_BRANCH"
         /usr/bin/git remote -v
-        /usr/bin/git push origin development
+
+        id -u
+        echo $HOME
+        /usr/bin/git push origin "$PARAM_DESTINATION_BRANCH"
