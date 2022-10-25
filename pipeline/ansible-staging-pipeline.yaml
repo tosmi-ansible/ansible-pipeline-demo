@@ -54,7 +54,7 @@ spec:
     - name: pull-request
       params:
         - name: sourceBranch
-          value: developement
+          value: development
         - name: destinationBranch
           value: production
       taskRef:
