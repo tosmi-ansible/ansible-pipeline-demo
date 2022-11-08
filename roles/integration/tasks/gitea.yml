@@ -8,9 +8,20 @@
     validate_certs: no
   register: integration_gitea_webhook_query
 
-- name: Register integration gitea webhook defined fact
+- name: Register fact with all Gitea web hooks
+  set_fact:
+    hook_urls: "{{ integration_gitea_webhook_query.json | json_query('[*].config.url') | join(' | ')}}"
+
+- name: Register fact if specific hooks are defined
   ansible.builtin.set_fact:
-    integration_gitea_webhook_defined: "{{ integration_gitea_webhook_query.json | count > 0}}"
+    integration_gitea_webhook_pipeline_defined: "{{ hook_urls | regex_search('el-ansible-staging-ansible-pipeline') is not none }}"
+    integration_gitea_webhook_controller_defined: "{{ hook_urls | regex_search('ctrl-service') is not none }}"
+
+- name: Print state of defined webhooks
+  debug:
+    msg:
+      - "Webhook to trigger controller feature environment job is defined? {{ integration_gitea_webhook_controller_defined }}"
+      - "Webhook to trigger tekton pipeline is defined? {{ integration_gitea_webhook_pipeline_defined }}"
 
 - name: Query controller for webhook key
   ansible.builtin.uri:
@@ -40,9 +51,9 @@
     body: "{{ lookup('ansible.builtin.template','gitea-controller-webhook.json.j2') }}"
     validate_certs: no
   when:
-    - not integration_gitea_webhook_defined
+    - not integration_gitea_webhook_controller_defined
 
-- name: Create Webhook to trigger Ansible Controller Job for creating feature environments
+- name: Create Webhook to trigger Tekton pipline
   ansible.builtin.uri:
     url: "{{ gitea_url}}/api/v1/repos/developer/ansible-example-collection/hooks"
     user: "{{ gitea_username }}"
@@ -52,7 +63,7 @@
     status_code:
       - 201
     body_format: json
-    body: "{{ lookup('ansible.builtin.template','gitea-controller-webhook.json.j2') }}"
+    body: "{{ lookup('ansible.builtin.template','gitea-tekton-webhook.json.j2') }}"
     validate_certs: no
   when:
-    - not integration_gitea_webhook_defined
+    - not integration_gitea_webhook_pipeline_defined
