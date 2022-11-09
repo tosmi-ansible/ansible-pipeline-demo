@@ -2,6 +2,7 @@
 
 This repository contains a simple pipeline that demonstrate how to
 
+- Onboard new teams to Ansible Controller
 - Validate Ansible code in an automated fashion
 - Merging changes automatically to different repository branches after
   validation
@@ -14,6 +15,7 @@ The demo is running in OpenShift, for reasons why see [here](#why-openshift).
 * [Motivation](#motivation)
 * [Tools](#tools)
 * [Pipeline overview](#pipeline-overview)
+* [Onboarding new teams](#onboarding-new-teams)
 * [Proposed developer workflow](#proposed-developer-workflow)
 * [Why OpenShift?](#why-openshift?)
 * [Prerequisites](#prerequisites)
@@ -28,6 +30,7 @@ Using Ansible for automation is only the starting point to a longer
 journey. For most larger automation setups the following questions
 arise after automating the first tasks:
 
+- How should we onboard new teams to Automation Platform?
 - How can we test our Ansible code base before applying it to
   production systems?
 - Which tools are available for testing Ansible code?
@@ -53,6 +56,17 @@ We use the following tools to implement our pipeline
 - [Tektion](https://tekton.dev/) for implementing our pipeline
 - [Ansible Controller](https://www.ansible.com/products/controller)
   for executing Ansible code
+
+## Onboarding new Teams
+
+The goal is to onboard new teams to Automation Platform in an
+automated way. New teams should automatically get:
+
+- A tower organization with one admin user for that organization
+- A GIT repository for storing Ansible Controller configuration
+- A GIT repository containing a sample Ansible collection that is
+  validated by the pipeline described below
+
 
 ## Pipeline overview
 
