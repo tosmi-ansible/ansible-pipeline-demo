@@ -1,4 +1,24 @@
 ---
+- name: Get cluster base domain for Automation Controller
+  kubernetes.core.k8s_info:
+    api_version: config.openshift.io/v1
+    kind: Ingress
+  register: controller_ocp_ingress_config
+
+- name: Print ingress domain
+  ansible.builtin.debug:
+    var: controller_ocp_ingress_config
+    verbosity: 2
+
+- name: Register fact with for the Controller domain
+  ansible.builtin.set_fact:
+    controller_domain: "{{ controller_ocp_ingress_config.resources[0].spec.domain }}"
+
+- name: Print controller_domain variable
+  ansible.builtin.debug:
+    var: controller_domain
+    verbosity: 2
+
 - name: Create namespace for Ansible platform operator
   kubernetes.core.k8s:
     state: present
@@ -96,13 +116,13 @@
         projects_storage_access_mode: ReadWriteMany
         projects_storage_size: 5Gi
         replicas: 1
-        route_host: ctrl.apps.ocp.lan.stderr.at
+        route_host: "ctrl.{{ controller_domain }}"
         route_tls_termination_mechanism: Edge
         service_type: ClusterIP
         task_privileged: false
 
 - name: Wait for all Ansible platform pods to be running
-  shell: kubectl get pods -o json -n ansible-automation-platform
+  ansible.builtin.shell: kubectl get pods -o json -n ansible-automation-platform -l app.kubernetes.io/part-of=ctrl
   register: kubectl_get_pods
   until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
 
@@ -127,7 +147,11 @@
     controller_password: "{{ controller_password_secret.resources[0].data.password | b64decode }}"
     controller_url: "https://{{ controller_route.resources[0].spec.host }}"
 
-- name: Disable SSL verifcation for GIT in controller
+- name: Give the controller time to start
+  ansible.builtin.wait_for:
+    delay: 60
+
+- name: Disable SSL verification for GIT in controller
   ansible.controller.settings:
     name: AWX_TASK_ENV
     value:
