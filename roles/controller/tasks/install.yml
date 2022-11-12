@@ -41,9 +41,33 @@
 
 # Stolen from https://stackoverflow.com/questions/53198576/ansible-playbook-wait-until-all-pods-running
 - name: Wait for Ansible platform operator pods to be running
-  shell: kubectl get pods -o json -n ansible-automation-platform
+  ansible.builtin.shell: kubectl get pods -o json -n ansible-automation-platform
   register: kubectl_get_pods
   until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 10
+  delay: 5
+
+- name: Check if we have an aws gp2-csi storage class available
+  kubernetes.core.k8s_info:
+    api_version: storage.k8s.io/v1
+    kind: StorageClass
+    name: gp2-csi
+  register: controller_gp2_csi_storageclass
+
+- name: Print controller_gp2_csi_storageclass
+  ansible.builtin.debug:
+    var: controller_gp2_csi_storageclass
+    verbosity: 2
+
+- name: Overwrite default storageclass if gp2-csi is available
+  ansible.builtin.set_fact:
+    controller_storageclass: gp2-csi
+  when: controller_gp2_csi_storageclass.resources[0] is defined
+
+- name: Print controller_storageclass
+  ansible.builtin.debug:
+    var: controller_storageclass
+    verbosity: 2
 
 - name: Deploy AutomationController
   kubernetes.core.k8s:
@@ -64,7 +88,7 @@
         loadbalancer_port: 80
         loadbalancer_protocol: http
         nodeport_port: 30080
-        postgres_storage_class: ceph-block
+        postgres_storage_class: "{{ controller_storageclass }}"
         postgres_storage_requirements:
           requests:
             storage: 8Gi
