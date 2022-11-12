@@ -8,13 +8,22 @@
     validate_certs: no
   register: gitea_user_query
 
+- name: Print git_user_query response
+  debug:
+    var: "{{ gitea_user_query }}"
+    verbosity: 2
+
 - name: Create fact for user status
   ansible.builtin.set_fact:
     gitea_user_registered: "{{ gitea_user_query.status | int == 200 }}"
 
+- name: Print git_user_query response
+  debug:
+    var: "{{ gitea_user_registered }}"
+    verbosity: 2
+
 - name: Create Gitea user and push template if user is not registered
   block:
-
   - name: Generate a password for the gitea user {{ gitea_username }} if not specified
     ansible.builtin.set_fact:
       gitea_developer_password: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
