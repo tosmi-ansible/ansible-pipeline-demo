@@ -27,7 +27,7 @@ verify:
 	@oc whoami
 
 setup: verify collections ## Run setup playbook
-	ansible-playbook playbooks/setup.yml
+	ansible-playbook $(VERBOSITY) playbooks/setup.yml
 
 ##################
 # Helper targets #
