@@ -22,7 +22,7 @@ The demo is running in OpenShift, for reasons why see [here](#why-openshift).
 * [Infrastructure setup](#infrastructure-setup)
 * [Preparing required content](#preparing-required-content)
 * [Running the demo](#running-the-demo)
-* [Possible improvements to the pipeline](# possible-improvements-to-the-pipeline)
+* [Possible improvements to the pipeline](#possible-improvements-to-the-pipeline)
 * [Tips and Tricks](#tips-and-tricks)
 
 ## Motivation
