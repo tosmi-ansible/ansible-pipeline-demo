@@ -1,4 +1,16 @@
 ---
+- name: Read the developer token from the corresponding K8s secret
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: gitea-developer-token
+    namespace: "{{ gitea_namespace }}"
+  register: pipeline_gitea_developer_token_secret
+
+- name: Register fact integration_gitea_developer_token
+  ansible.builtin.set_fact:
+    pipeline_gitea_developer_token: "{{ pipeline_gitea_developer_token_secret.resources[0].data.token | b64decode}}"
+
 - name: Install the OpenShift Pipelines operator
   kubernetes.core.k8s:
     state: present
@@ -30,18 +42,23 @@
     src: git-clone.yaml
     namespace: ansible-pipeline
 
+- name: Create secret for push to the examples collection
+  kubernetes.core.k8s:
+    state: present
+    namespace: ansible-pipeline
+    definition: "{{ lookup('template', 'ansible-staging-git-basicauth-secret.yml.j2') | from_yaml }}"
+
 - name: Create pipeline objects
   kubernetes.core.k8s:
     state: present
     src: "pipeline/{{ item }}"
     namespace: ansible-pipeline
   loop:
-    - ansible-staging-pull-request.yaml
-    - ansible-staging-pipeline.yaml
+    - ansible-staging-pull-request.yml
+    - ansible-staging-pipeline.yml
     - ansible-staging-merge-task.yml
-    - ansible-staging-controller-job-task.yaml
-    - ansible-staging-git-basicauth-secret.yaml
-    - ansible-staging-triggertemplate.yaml
-    - ansible-staging-lint-task.yaml
-    - ansible-staging-triggerbinding.yaml
-    - ansible-staging-eventlistener.yaml
+    - ansible-staging-controller-job-task.yml
+    - ansible-staging-triggertemplate.yml
+    - ansible-staging-lint-task.yml
+    - ansible-staging-triggerbinding.yml
+    - ansible-staging-eventlistener.yml
