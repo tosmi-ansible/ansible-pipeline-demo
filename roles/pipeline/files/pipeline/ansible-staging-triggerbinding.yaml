@@ -1,0 +1,15 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: ansible-staging-triggerbinding
+  namespace: ansible-pipeline
+spec:
+  params:
+    - name: git-revision-before
+      value: $(body.before)
+    - name: git-revision-after
+      value: $(body.after)
+    - name: git-ref
+      value: $(body.ref)
+    - name: git-repository-url
+      value: $(body.repository.clone_url)

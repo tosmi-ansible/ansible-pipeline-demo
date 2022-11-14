@@ -27,12 +27,19 @@ verify:
 	@oc whoami
 
 setup: verify collections ## Run setup playbook
-	ansible-playbook playbooks/setup.yml
+	ansible-playbook $(VERBOSITY) playbooks/setup.yml
 
 ##################
 # Helper targets #
 ##################
-.PHONY: toc
+.PHONY: toc pipeline-test utils-image
 
 toc: ## Generate a simple markdown toc, does not support levels!
 	@awk -F'^#+'  '/^#.*/ && !/^## Table/ && NR!=1  {gsub("^ ","",$$2); link=tolower($$2); gsub(" ","-",link); printf "* [%s](#%s)\n",$$2,link }' README.md
+
+pipeline-test: ## Trigger a pipeline run with a locally stored gitea event (just for testing)
+	@bash -x tests/pipeline/trigger-pipeline.sh
+
+utils-image: ## Generate a UBI 9 based image that contains the `jq` binary
+	@buildah build -t quay.io/tosmi/ubi9-utils:latest pipeline/scripts/
+	@podman push quay.io/tosmi/ubi9-utils:latest

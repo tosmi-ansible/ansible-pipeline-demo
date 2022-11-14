@@ -10,22 +10,22 @@
     controller_host: "{{ controller_url }}"
     validate_certs: no
 
-- name: Create a GIT credentials for accessing the Gitea repository
-  ansible.controller.credential:
-    name: Pipeline - Gitea token
-    description: Token to access Gitea
-    state: present
-    organization: Pipeline
-    credential_type: "GitHub Personal Access Token"
-    inputs:
-      token: "{{ gitea_developer_token }}"
-    # controller variables
-    controller_username: admin
-    controller_password: "{{ controller_password }}"
-    controller_host: "{{ controller_url }}"
-    validate_certs: no
-  when:
-    - gitea_developer_token is defined
+# - name: Create a GIT credentials for accessing the Gitea repository
+#   ansible.controller.credential:
+#     name: Pipeline - Gitea token
+#     description: Token to access Gitea
+#     state: present
+#     organization: Pipeline
+#     credential_type: "GitHub Personal Access Token"
+#     inputs:
+#       token: "{{ gitea_developer_token }}"
+#     # controller variables
+#     controller_username: admin
+#     controller_password: "{{ controller_password }}"
+#     controller_host: "{{ controller_url }}"
+#     validate_certs: no
+#   when:
+#     - gitea_developer_token is defined
 
 - name: Create a project for our development branch
   ansible.controller.project:
@@ -66,7 +66,7 @@
     state: present
     organization: Pipeline
     project: "Pipeline - SOE - DEV"
-    playbook: "playbooks/linux-soe.yml"
+    playbook: "linux-soe.yml"
     inventory: "Demo Inventory"
     # controller variables
     controller_username: admin
@@ -81,7 +81,7 @@
     state: present
     organization: Pipeline
     project: "Pipeline - SOE - PROD"
-    playbook: "playbooks/linux-soe.yml"
+    playbook: "linux-soe.yml"
     inventory: "Demo Inventory"
     # controller variables
     controller_username: admin
@@ -96,7 +96,7 @@
     state: present
     organization: Pipeline
     project: "Pipeline - SOE - DEV"
-    playbook: "playbooks/feature-environment-webhook.yml"
+    playbook: "feature-environment-webhook.yml"
     inventory: "Demo Inventory"
     # controller variables
     controller_username: admin
@@ -107,3 +107,21 @@
     extra_vars:
       controller_url: "{{ controller_url }}"
       controller_oauthtoken: "{{ controller_oauthtoken }}"
+  register: controller_feature_env_webhook
+
+- name: Print controller_feature_env_webhook
+  ansible.builtin.debug:
+    var: controller_feature_env_webhook
+    verbosity: 2
+
+# this is reused in the integration role. the webhook seems to be more stable
+# if the ID is used and not the URL encoded name of the job
+- name: Register variable storing the job id for the feature environment template
+  ansible.builtin.set_fact:
+    controller_feature_env_job_template_svc_url: "http://ctrl-service.ansible-automation-platform/api/v2/job_templates/{{ controller_feature_env_webhook.id }}"
+    controller_feature_env_job_template_url: "{{ controller_url }}/api/v2/job_templates/{{ controller_feature_env_webhook.id }}"
+
+- name: Print controller_feature_env_job_template_url
+  ansible.builtin.debug:
+    var: controller_feature_env_job_template_url
+    verbosity: 2

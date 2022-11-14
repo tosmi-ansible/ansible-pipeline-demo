@@ -1,3 +1,24 @@
+---
+- name: Get cluster base domain for Gitea route
+  kubernetes.core.k8s_info:
+    api_version: config.openshift.io/v1
+    kind: Ingress
+  register: gitea_ocp_ingress_config
+
+- name: Print ingress domain
+  ansible.builtin.debug:
+    var: gitea_ocp_ingress_config
+    verbosity: 2
+
+- name: Register fact with for the Gitea domain
+  ansible.builtin.set_fact:
+    gitea_domain: "{{ gitea_ocp_ingress_config.resources[0].spec.domain }}"
+
+- name: Print gitea_domain variable
+  ansible.builtin.debug:
+    var: gitea_domain
+    verbosity: 2
+
 - name: Add Gitea helm repository
   kubernetes.core.helm_repository:
     name: gitea
@@ -12,6 +33,24 @@
       metadata:
         name: "{{ gitea_namespace}}"
 
+# The gitea image uses a fixed UID, leverage the nonroot scc
+- name: Allow default service account to use nonroot scc
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: gitea-nonroot
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: system:openshift:scc:nonroot
+      subjects:
+      - kind: ServiceAccount
+        name: default
+        namespace: gitea
+
 - name: Install Gitea via helm
   kubernetes.core.helm:
     name: gitea
@@ -22,7 +61,7 @@
       gitea:
         config:
           server:
-            ROOT_URL: https://gitea.apps.ocp.lan.stderr.at
+            ROOT_URL: "https://gitea.{{ gitea_domain }}"
           webhook:
             ALLOWED_HOST_LIST: private
       image:
@@ -47,7 +86,7 @@
         name: gitea-https
         namespace: "{{ gitea_namespace }}"
       spec:
-        host: gitea.apps.ocp.lan.stderr.at
+        host: "gitea.{{ gitea_domain }}"
         port:
           targetPort: http
         to:
@@ -63,3 +102,14 @@
   shell: kubectl get pods -o json -n gitea
   register: kubectl_get_pods
   until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 10
+  delay: 5
+
+- name: Wait for Gitea to become available
+  ansible.builtin.uri:
+    url: "https://gitea.{{ gitea_domain }}/"
+    validate_certs: no
+  register: result
+  until: "result.status == 200"
+  retries: 20
+  delay: 3

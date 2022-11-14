@@ -1,0 +1,6 @@
+{
+    "base": "production",
+    "head": "development",
+    "body": "We want to merge into production",
+    "title": "Merge into production"
+}

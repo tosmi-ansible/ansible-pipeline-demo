@@ -1,0 +1,261 @@
+{
+    "ref": "refs/heads/main",
+    "before": "cf03671e706208a0e84457ddb585e16e59477cb7",
+    "after": "d19b326698ac3d034efd906af486940c04f23170",
+    "compare_url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection/compare/cf03671e706208a0e84457ddb585e16e59477cb7...d19b326698ac3d034efd906af486940c04f23170",
+    "commits": [
+	{
+	"id": "d19b326698ac3d034efd906af486940c04f23170",
+	"message": "set scm_update_on_launch for feature branch project\n",
+	"url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection/commit/d19b326698ac3d034efd906af486940c04f23170",
+	"author": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"committer": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"verification": null,
+	"timestamp": "2022-10-20T16:36:34+02:00",
+	"added": [],
+	"removed": [],
+	"modified": [
+            "playbooks/feature-environment-webhook.yml"
+	]
+    },
+	{
+	"id": "4ff6411d3e03f06a369ab20f32fc60d4dc31a2e4",
+	"message": "fix debug message\n",
+	"url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection/commit/4ff6411d3e03f06a369ab20f32fc60d4dc31a2e4",
+	"author": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"committer": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"verification": null,
+	"timestamp": "2022-10-20T16:33:40+02:00",
+	"added": [],
+	"removed": [],
+	"modified": [
+            "playbooks/feature-environment-webhook.yml"
+	]
+    },
+	{
+	"id": "a8ac5eca352994364c1e96fd42582ec77f6a8fd5",
+	"message": "Gitea delete hook does not set event ref, so use the ref from the payload\n",
+	"url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection/commit/a8ac5eca352994364c1e96fd42582ec77f6a8fd5",
+	"author": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"committer": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"verification": null,
+	"timestamp": "2022-10-20T16:31:35+02:00",
+	"added": [],
+	"removed": [],
+	"modified": [
+            "playbooks/feature-environment-webhook.yml"
+	]
+    },
+	{
+	"id": "66ff761431871eeedcabc4b2f03fb21f2056be8b",
+	"message": "Fix naming of jobs and projects\n",
+	"url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection/commit/66ff761431871eeedcabc4b2f03fb21f2056be8b",
+	"author": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"committer": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"verification": null,
+	"timestamp": "2022-10-20T16:24:39+02:00",
+	"added": [],
+	"removed": [],
+	"modified": [
+            "playbooks/feature-environment-webhook.yml"
+	]
+    },
+	{
+	"id": "f5112358112907d8ef6724769547dcd530375498",
+	"message": "fixed a typo\n",
+	"url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection/commit/f5112358112907d8ef6724769547dcd530375498",
+	"author": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"committer": {
+            "name": "Toni Schmidbauer",
+            "email": "toni@stderr.at",
+            "username": ""
+	},
+	"verification": null,
+	"timestamp": "2022-10-20T16:18:55+02:00",
+	"added": [],
+	"removed": [],
+	"modified": [
+            "playbooks/feature-environment-webhook.yml"
+	]
+    }
+    ],
+    "head_commit": {
+	"id": "d19b326698ac3d034efd906af486940c04f23170",
+	"message": "set scm_update_on_launch for feature branch project\n",
+	"url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection/commit/d19b326698ac3d034efd906af486940c04f23170",
+	"author": {
+	    "name": "Toni Schmidbauer",
+	    "email": "toni@stderr.at",
+	    "username": ""
+	},
+	"committer": {
+	    "name": "Toni Schmidbauer",
+	    "email": "toni@stderr.at",
+	    "username": ""
+	},
+	"verification": null,
+	"timestamp": "2022-10-20T16:36:34+02:00",
+	"added": [],
+	"removed": [],
+	"modified": [
+	    "playbooks/feature-environment-webhook.yml"
+	]
+    },
+    "repository": {
+	"id": 21,
+	"owner": {
+	    "id": 20,
+	    "login": "developer",
+	    "full_name": "",
+	    "email": "developer@does-not-exist.io",
+	    "avatar_url": "https://secure.gravatar.com/avatar/49f4b009beafba35fead35650fc541ad?d=identicon",
+	    "language": "",
+	    "is_admin": false,
+	    "last_login": "0001-01-01T00:00:00Z",
+	    "created": "2022-10-17T14:42:51Z",
+	    "restricted": false,
+	    "active": false,
+	    "prohibit_login": false,
+	    "location": "",
+	    "website": "",
+	    "description": "",
+	    "visibility": "public",
+	    "followers_count": 0,
+	    "following_count": 0,
+	    "starred_repos_count": 0,
+	    "username": "developer"
+	},
+	"name": "ansible-example-collection",
+	"full_name": "developer/ansible-example-collection",
+	"description": "A simple example collection",
+	"empty": false,
+	"private": false,
+	"fork": false,
+	"template": false,
+	"parent": null,
+	"mirror": false,
+	"size": 592,
+	"language": "",
+	"languages_url": "https://gitea.apps.ocp.lan.stderr.at/api/v1/repos/developer/ansible-example-collection/languages",
+	"html_url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection",
+	"ssh_url": "git@git.example.com:developer/ansible-example-collection.git",
+	"clone_url": "https://gitea.apps.ocp.lan.stderr.at/developer/ansible-example-collection.git",
+	"original_url": "",
+	"website": "",
+	"stars_count": 0,
+	"forks_count": 0,
+	"watchers_count": 1,
+	"open_issues_count": 0,
+	"open_pr_counter": 0,
+	"release_counter": 0,
+	"default_branch": "main",
+	"archived": false,
+	"created_at": "2022-10-17T14:42:55Z",
+	"updated_at": "2022-10-20T14:41:48Z",
+	"permissions": {
+	    "admin": true,
+	    "push": true,
+	    "pull": true
+	},
+	"has_issues": true,
+	"internal_tracker": {
+	    "enable_time_tracker": true,
+	    "allow_only_contributors_to_track_time": true,
+	    "enable_issue_dependencies": true
+	},
+	"has_wiki": true,
+	"has_pull_requests": true,
+	"has_projects": true,
+	"ignore_whitespace_conflicts": false,
+	"allow_merge_commits": true,
+	"allow_rebase": true,
+	"allow_rebase_explicit": true,
+	"allow_squash_merge": true,
+	"default_merge_style": "merge",
+	"avatar_url": "",
+	"internal": false,
+	"mirror_interval": "",
+	"mirror_updated": "0001-01-01T00:00:00Z",
+	"repo_transfer": null
+    },
+    "pusher": {
+	"id": 20,
+	"login": "developer",
+	"full_name": "",
+	"email": "developer@does-not-exist.io",
+	"avatar_url": "https://secure.gravatar.com/avatar/49f4b009beafba35fead35650fc541ad?d=i",
+	"language": "",
+	"is_admin": false,
+	"last_login": "0001-01-01T00:00:00Z",
+	"created": "2022-10-17T14:42:51Z",
+	"restricted": false,
+	"active": false,
+	"prohibit_login": false,
+	"location": "",
+	"website": "",
+	"description": "",
+	"visibility": "public",
+	"followers_count": 0,
+	"following_count": 0,
+	"starred_repos_count": 0,
+	"username": "developer"
+    },
+    "sender": {
+	"id": 20,
+	"login": "developer",
+	"full_name": "",
+	"email": "developer@does-not-exist.io",
+	"avatar_url": "https://secure.gravatar.com/avatar/49f4b009beafba35fead35650fc541ad?d=i    ",
+	"language": "",
+	"is_admin": false,
+	"last_login": "0001-01-01T00:00:00Z",
+	"created": "2022-10-17T14:42:51Z",
+	"restricted": false,
+	"active": false,
+	"prohibit_login": false,
+	"location": "",
+	"website": "",
+	"description": "",
+	"visibility": "public",
+	"followers_count": 0,
+	"following_count": 0,
+	"starred_repos_count": 0,
+	"username": "developer"
+    }
+}

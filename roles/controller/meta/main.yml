@@ -49,3 +49,5 @@ galaxy_info:
 
 dependencies:
   - gitea
+  # we depend on the namespace the pipeline roles creates
+  - pipeline

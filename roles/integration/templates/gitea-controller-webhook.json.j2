@@ -3,7 +3,7 @@
     "branch_filter": "feature/*",
     "config": {
 	"content_type": "json",
-	"url": "http://ctrl-service.ansible-automation-platform.svc.cluster.local/api/v2/job_templates/Pipeline - Gitea Webhook++Pipeline/github/",
+	"url": "{{ controller_feature_env_job_template_svc_url }}/github/",
 	"secret": "{{ integration_controller_webhook_key }}"
     },
     "events": [

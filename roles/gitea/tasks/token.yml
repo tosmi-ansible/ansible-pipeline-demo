@@ -29,7 +29,7 @@
       ansible.builtin.set_fact:
         gitea_developer_token: "{{ gitea_created_developer_token.json.sha1 }}"
 
-    - name: Store the developer password in a Kubernetes secret
+    - name: Store the developer token in a Kubernetes secret
       kubernetes.core.k8s:
         state: present
         definition:

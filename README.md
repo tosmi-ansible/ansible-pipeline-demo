@@ -2,6 +2,7 @@
 
 This repository contains a simple pipeline that demonstrate how to
 
+- Onboard new teams to Ansible Controller
 - Validate Ansible code in an automated fashion
 - Merging changes automatically to different repository branches after
   validation
@@ -14,12 +15,14 @@ The demo is running in OpenShift, for reasons why see [here](#why-openshift).
 * [Motivation](#motivation)
 * [Tools](#tools)
 * [Pipeline overview](#pipeline-overview)
+* [Onboarding new teams](#onboarding-new-teams)
 * [Proposed developer workflow](#proposed-developer-workflow)
 * [Why OpenShift?](#why-openshift?)
 * [Prerequisites](#prerequisites)
 * [Infrastructure setup](#infrastructure-setup)
 * [Preparing required content](#preparing-required-content)
-* [Possible improvements to the pipeline](# possible-improvements-to-the-pipeline)
+* [Running the demo](#running-the-demo)
+* [Possible improvements to the pipeline](#possible-improvements-to-the-pipeline)
 * [Tips and Tricks](#tips-and-tricks)
 
 ## Motivation
@@ -28,6 +31,7 @@ Using Ansible for automation is only the starting point to a longer
 journey. For most larger automation setups the following questions
 arise after automating the first tasks:
 
+- How should we onboard new teams to Automation Platform?
 - How can we test our Ansible code base before applying it to
   production systems?
 - Which tools are available for testing Ansible code?
@@ -53,6 +57,17 @@ We use the following tools to implement our pipeline
 - [Tektion](https://tekton.dev/) for implementing our pipeline
 - [Ansible Controller](https://www.ansible.com/products/controller)
   for executing Ansible code
+
+## Onboarding new Teams
+
+The goal is to onboard new teams to Automation Platform in an
+automated way. New teams should automatically get:
+
+- A tower organization with one admin user for that organization
+- A GIT repository for storing Ansible Controller configuration
+- A GIT repository containing a sample Ansible collection that is
+  validated by the pipeline described below
+
 
 ## Pipeline overview
 
@@ -229,10 +244,10 @@ TASK [Print Ansible Controller route] ******************************************
 For getting the Automation Controller ready you need to provide a
 valid subscription upon first login.
 
-After adding a subscription run
+After adding a subscription run `make setup` again
 
 ```
-make controller-content
+make setup
 ```
 
 to prepare Ansible Controller for this demo. This will
@@ -240,6 +255,90 @@ to prepare Ansible Controller for this demo. This will
 - Create a development and production project
 - Create one job template to configure development hosts
 - Create one job template to configure production hosts
+
+## Running the Demo
+
+This section contains instruction on how to run this demo.
+
+### Creating a new feature
+
+We would like to develop a new feature and push it to
+production. Perform the steps listed below.
+
+#### Step 1: Cloning the example collection from Gitea
+
+Because we are using self signed certificates, we need to disable SSL
+verification. We will also cache the password for a faster workflow.
+
+NOTE: This is NOT recommended for production environments!
+
+```
+git -c http.sslVerify=false clone https://developer:<password>@gitea.apps.ocp.aws.tntinfra.net/developer/ansible-example-collection.git
+cd ansible-example-collection
+git config http.sslVerify false
+git config credential.helper 'cache --timeout=300'
+```
+
+#### Step 2: Create a new feature branch and push the branch
+
+```
+git checkout -b feature/fancy
+git push -u origin feature/fancy
+```
+
+The push event is going to create
+
+- A project in Ansible Controller with the name _Pipeline - SOE - Feature branch feature/fancy_
+- A job template that uses the branch _feature/fancy_ in the GIT repository _ansible-example-collection_
+
+#### Step 3: Develop and test code
+
+Make use develop in the new feature branch _feature/fancy_:
+
+```
+git checkout feature/fancy
+```
+
+Change the message in _linux-soe.yml_, commit and push the change
+
+```
+git add linux-soe.yml
+git commit -m 'implemented new fancy feature'
+git push
+```
+
+#### Step 4: Test you code via Ansible controller
+
+You can now trigger the job template _Pipeline - SOE - Feature branch
+feature/fancy_ and check if everything is all right.
+
+#### Step 5: Merge to code into the _main_ branch
+
+When you are happy with your new feature merge the branch _feature/fancy_ to _main_.
+
+- Either via the Gitea UI (Open a pull request)
+- or via the command line:
+```
+git checkout main
+git merge feature/fancy
+git push
+```
+
+A push into the main branch trigger the ansible pipeline.
+
+#### Step 6: Check the pipeline for errors
+
+If ansible-lint runs successfully the pipeline will automaticall merge
+the code from the _main_ branch into into _development_ and trigger a run of the _Pipeline - SOE - Development hosts_ template.
+
+If the job succeeds successfully the pipeline creates a merge request
+into production.
+
+#### Step 7: Check if a merge request into production is available
+
+If the pipeline run triggered in Step 5 is successfull the pipeline
+will automatically open a merge request to production.
+
 
 ## Possible improvements to the pipeline
 

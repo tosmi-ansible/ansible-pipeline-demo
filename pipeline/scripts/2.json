@@ -1,0 +1,15 @@
+{
+  "assignee": "string",
+  "assignees": [
+    "string"
+  ],
+  "base": "string",
+  "body": "string",
+  "due_date": "2022-10-24T15:14:35.602Z",
+  "Head": "string",
+  "labels": [
+    0
+  ],
+  "milestone": 0,
+  "title": "string"
+}
