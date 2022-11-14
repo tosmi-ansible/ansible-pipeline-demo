@@ -25,7 +25,7 @@
 
 - name: Query controller for webhook key
   ansible.builtin.uri:
-    url: "{{ controller_url }}/api/v2/job_templates/Pipeline%20-%20Gitea%20Webhook++Pipeline/webhook_key/"
+    url: "{{ controller_feature_env_job_template_url }}/webhook_key/"
     method: GET
     user: admin
     password: "{{ controller_password }}"
@@ -33,6 +33,11 @@
     force_basic_auth: yes
     validate_certs: no
   register: integration_controller_webhook_key_query
+
+- name: Print integration_controller_webhook_key_query variable
+  ansible.builtin.debug:
+    var: integration_controller_webhook_key_query
+    verbosity: 2
 
 - name: Register fact with webhook key
   ansible.builtin.set_fact:

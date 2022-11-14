@@ -107,3 +107,21 @@
     extra_vars:
       controller_url: "{{ controller_url }}"
       controller_oauthtoken: "{{ controller_oauthtoken }}"
+  register: controller_feature_env_webhook
+
+- name: Print controller_feature_env_webhook
+  ansible.builtin.debug:
+    var: controller_feature_env_webhook
+    verbosity: 2
+
+# this is reused in the integration role. the webhook seems to be more stable
+# if the ID is used and not the URL encoded name of the job
+- name: Register variable storing the job id for the feature environment template
+  ansible.builtin.set_fact:
+    controller_feature_env_job_template_svc_url: "http://ctrl-service.ansible-automation-platform/api/v2/job_templates/{{ controller_feature_env_webhook.id }}"
+    controller_feature_env_job_template_url: "{{ controller_url }}/api/v2/job_templates/{{ controller_feature_env_webhook.id }}"
+
+- name: Print controller_feature_env_job_template_url
+  ansible.builtin.debug:
+    var: controller_feature_env_job_template_url
+    verbosity: 2
