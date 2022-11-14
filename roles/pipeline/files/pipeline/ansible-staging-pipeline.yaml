@@ -1,0 +1,63 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ansible-staging
+  namespace: ansible-pipeline
+spec:
+  workspaces:
+    - name: ansible-lint-ws
+    - name: git-credentials-ws
+  tasks:
+    - name: git-clone
+      params:
+        - name: url
+          value: http://gitea-http.gitea:3000/developer/ansible-example-collection.git
+        - name: revision
+          value: main
+        - name: depth
+          value: "0"
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: ansible-lint-ws
+        - name: basic-auth
+          workspace: git-credentials-ws
+    - name: ansible-lint
+      taskRef:
+        name: ansible-lint
+      workspaces:
+        - name: output
+          workspace: ansible-lint-ws
+      runAfter:
+        - git-clone
+    - name: git-merge
+      taskRef:
+        name: git-merge
+      workspaces:
+        - name: output
+          workspace: ansible-lint-ws
+        - name: basic-auth
+          workspace: git-credentials-ws
+      runAfter:
+        - ansible-lint
+    - name: controller-job
+      params:
+        - name: controller-url
+          value: http://ctrl-service.ansible-automation-platform
+        - name: controller-job-name
+          value: "Pipeline - SOE - Development hosts"
+      taskRef:
+        name: controller-job
+      runAfter:
+        - git-merge
+    - name: pull-request
+      params:
+        - name: sourceBranch
+          value: development
+        - name: destinationBranch
+          value: production
+      taskRef:
+        name: pull-request
+      runAfter:
+        - controller-job

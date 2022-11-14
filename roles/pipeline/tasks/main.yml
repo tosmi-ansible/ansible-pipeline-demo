@@ -29,3 +29,19 @@
     state: present
     src: git-clone.yaml
     namespace: ansible-pipeline
+
+- name: Create pipeline objects
+  kubernetes.core.k8s:
+    state: present
+    src: "pipeline/{{ item }}"
+    namespace: ansible-pipeline
+  loop:
+    - ansible-staging-pull-request.yaml
+    - ansible-staging-pipeline.yaml
+    - ansible-staging-merge-task.yml
+    - ansible-staging-controller-job-task.yaml
+    - ansible-staging-git-basicauth-secret.yaml
+    - ansible-staging-triggertemplate.yaml
+    - ansible-staging-lint-task.yaml
+    - ansible-staging-triggerbinding.yaml
+    - ansible-staging-eventlistener.yaml
