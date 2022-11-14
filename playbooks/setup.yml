@@ -4,8 +4,8 @@
     # Keep the order here!
     # It's also defined in meta/main.yml
     - gitea
-    - controller
     - pipeline
+    - controller
     - integration
 
   post_tasks:
