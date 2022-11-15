@@ -106,7 +106,7 @@
     webhook_service: github
     extra_vars:
       controller_url: "{{ controller_url }}"
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      controller_oauthtoken: "{{ controller_token }}"
   register: controller_feature_env_webhook
 
 - name: Print controller_feature_env_webhook

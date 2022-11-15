@@ -32,7 +32,7 @@ setup: verify collections ## Run setup playbook
 ##################
 # Helper targets #
 ##################
-.PHONY: toc pipeline-test utils-image
+.PHONY: toc pipeline-test utils-image display-credentials
 
 toc: ## Generate a simple markdown toc, does not support levels!
 	@awk -F'^#+'  '/^#.*/ && !/^## Table/ && NR!=1  {gsub("^ ","",$$2); link=tolower($$2); gsub(" ","-",link); printf "* [%s](#%s)\n",$$2,link }' README.md
@@ -43,3 +43,10 @@ pipeline-test: ## Trigger a pipeline run with a locally stored gitea event (just
 utils-image: ## Generate a UBI 9 based image that contains the `jq` binary
 	@buildah build -t quay.io/tosmi/ubi9-utils:latest pipeline/scripts/
 	@podman push quay.io/tosmi/ubi9-utils:latest
+
+display-credentials : CONTROLLER_PASSWORD := $(shell oc extract secrets/ctrl-admin-password  --to=- -n ansible-automation-platform 2>&1 | grep -v ^#)
+display-credentials : GITEA_PASSWORD := $(shell oc extract secrets/gitea-developer-password  --to=- -n gitea 2>&1 | grep -v ^#)
+
+display-credentials: ## Display credentials for Gitea and Automation Platform
+	@echo 'Automation controller password: $(CONTROLLER_PASSWORD)'
+	@echo 'Gitea developer password: $(GITEA_PASSWORD)'

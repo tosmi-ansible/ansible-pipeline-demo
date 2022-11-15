@@ -339,6 +339,27 @@ into production.
 If the pipeline run triggered in Step 5 is successfull the pipeline
 will automatically open a merge request to production.
 
+### Step 8: Remove the feature branch
+
+Execute
+
+```
+git push origin :feature/fancy
+```
+
+to remove the feature branch we created in Step 2. This will delete the branch
+in the remote Gitea repository.
+
+```
+git branch -d feature/fancy
+```
+
+will remove the branch locally.
+
+### Step 9: Confirm feature environment got removed from Ansible Controller
+
+Confirm going back to the Ansible Controller web UI, the job template _Pipeline - SOE - Development hosts_ and the project
+
 
 ## Possible improvements to the pipeline
 

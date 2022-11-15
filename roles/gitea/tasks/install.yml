@@ -51,6 +51,19 @@
         name: default
         namespace: gitea
 
+- name: Check if the Gitea statefulset is already available
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: StatefulSet
+    name: gitea
+    namespace: "{{ gitea_namespace }}"
+  register: gitea_statefulset
+
+- name: Print gitea statefulset
+  ansible.builtin.debug:
+    var: gitea_statefulset
+    verbosity: 2
+
 - name: Install Gitea via helm
   kubernetes.core.helm:
     name: gitea
@@ -73,6 +86,7 @@
         enabled: true
       memcached:
         enabled: false
+  when: gitea_statefulset.resources | length < 1
 
 - name: Create OpenShift route
   kubernetes.core.k8s:
@@ -102,8 +116,8 @@
   shell: kubectl get pods -o json -n gitea
   register: kubectl_get_pods
   until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
-  retries: 10
-  delay: 5
+  retries: 30
+  delay: 3
 
 - name: Wait for Gitea to become available
   ansible.builtin.uri:

@@ -1,4 +1,16 @@
 ---
+- name: Read the developer token from the corresponding K8s secret
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: gitea-developer-token
+    namespace: "{{ gitea_namespace }}"
+  register: pipeline_gitea_developer_token_secret
+
+- name: Register fact integration_gitea_developer_token
+  ansible.builtin.set_fact:
+    pipeline_gitea_developer_token: "{{ pipeline_gitea_developer_token_secret.resources[0].data.token | b64decode}}"
+
 - name: Install the OpenShift Pipelines operator
   kubernetes.core.k8s:
     state: present
@@ -15,6 +27,20 @@
         source: redhat-operators
         sourceNamespace: openshift-marketplace
 
+# filter for pods with a specific label, as there are jobs in the state 'Completed'
+- name: Wait for openshift-pipelines pods to be running
+  shell: kubectl get pods -o json -n openshift-pipelines -l app.kubernetes.io/component=webhook
+  register: pipeline_kubectl_get_pods
+  until: pipeline_kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 30
+  delay: 3
+
+# checking for running pods has a race condition. if in the moment of the check
+# all pods are running we continue, even if pods are currently being scheduled
+- name: Pause for 2 minutes to give the pipeline time to finish startup
+  ansible.builtin.pause:
+    minutes: 2
+
 - name: Create a namespace for the ansible-pipeline
   kubernetes.core.k8s:
     state: present
@@ -30,18 +56,23 @@
     src: git-clone.yaml
     namespace: ansible-pipeline
 
+- name: Create secret for push to the examples collection
+  kubernetes.core.k8s:
+    state: present
+    namespace: ansible-pipeline
+    definition: "{{ lookup('template', 'ansible-staging-git-basicauth-secret.yml.j2') | from_yaml }}"
+
 - name: Create pipeline objects
   kubernetes.core.k8s:
     state: present
     src: "pipeline/{{ item }}"
     namespace: ansible-pipeline
   loop:
-    - ansible-staging-pull-request.yaml
-    - ansible-staging-pipeline.yaml
+    - ansible-staging-pull-request.yml
+    - ansible-staging-pipeline.yml
     - ansible-staging-merge-task.yml
-    - ansible-staging-controller-job-task.yaml
-    - ansible-staging-git-basicauth-secret.yaml
-    - ansible-staging-triggertemplate.yaml
-    - ansible-staging-lint-task.yaml
-    - ansible-staging-triggerbinding.yaml
-    - ansible-staging-eventlistener.yaml
+    - ansible-staging-controller-job-task.yml
+    - ansible-staging-triggertemplate.yml
+    - ansible-staging-lint-task.yml
+    - ansible-staging-triggerbinding.yml
+    - ansible-staging-eventlistener.yml
