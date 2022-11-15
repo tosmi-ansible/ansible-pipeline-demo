@@ -273,6 +273,7 @@ verification. We will also cache the password for a faster workflow.
 NOTE: This is NOT recommended for production environments!
 
 ```
+export DEVELOPER_PASSWORD=$(oc extract secret/gitea-developer-password -n gitea --to=-)
 git -c http.sslVerify=false clone https://developer:<password>@gitea.apps.ocp.aws.tntinfra.net/developer/ansible-example-collection.git
 cd ansible-example-collection
 git config http.sslVerify false
