@@ -27,6 +27,14 @@
         source: redhat-operators
         sourceNamespace: openshift-marketplace
 
+# filter for pods with a specific label, as there are jobs in the state 'Completed'
+- name: Wait for openshift-pipelines pods to be running
+  shell: kubectl get pods -o json -n openshift-pipelines -l app.kubernetes.io/instance=default
+  register: pipeline_kubectl_get_pods
+  until: pipeline_kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 30
+  delay: 3
+
 - name: Create a namespace for the ansible-pipeline
   kubernetes.core.k8s:
     state: present
