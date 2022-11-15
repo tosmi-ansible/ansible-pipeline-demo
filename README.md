@@ -273,11 +273,11 @@ verification. We will also cache the password for a faster workflow.
 NOTE: This is NOT recommended for production environments!
 
 ```
-export DEVELOPER_PASSWORD=$(oc extract secret/gitea-developer-password -n gitea --to=-)
-git -c http.sslVerify=false clone https://developer:<password>@gitea.apps.ocp.aws.tntinfra.net/developer/ansible-example-collection.git
+export GITEA_PASSWORD=$(oc extract secret/gitea-developer-password -n gitea --to=-)
+export GITEA_HOST=$(oc get route gitea-https  -n gitea -o jsonpath='{.spec.host}')
+git -c http.sslVerify=false clone https://developer:"$GITEA_PASSWORD"@"$GITEA_HOST"/developer/ansible-example-collection.git
 cd ansible-example-collection
 git config http.sslVerify false
-git config credential.helper 'cache --timeout=300'
 ```
 
 #### Step 2: Create a new feature branch and push the branch
