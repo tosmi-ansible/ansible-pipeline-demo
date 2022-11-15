@@ -155,8 +155,16 @@
     validate_certs: no
   register: result
   until: "result.status == 200"
-  retries: 6
-  delay: 10
+  retries: 30
+  delay: 3
+
+# the settings endpoint returns a html page containing
+# 'Red Hat Ansible Automation Platform is currently upgrading.'
+# even if the ping endpoint is reachable. maybe we should check for that.
+# and skip the pause
+- name: Pause for 2 minutes to give the controller time to finish startup
+  ansible.builtin.pause:
+    minutes: 2
 
 - name: Disable SSL verification for GIT in controller
   ansible.controller.settings:
