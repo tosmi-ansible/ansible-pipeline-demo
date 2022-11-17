@@ -2,11 +2,11 @@
 
 This repository contains a simple pipeline that demonstrate how to
 
-- Onboard new teams to Ansible Controller
+- Onboard new teams to Ansible Controller (WIP)
 - Validate Ansible code in an automated fashion
 - Merging changes automatically to different repository branches after
   validation
-- Triggering Ansible Controller jobs after merging
+- Triggering Ansible Controller jobs after merging to rollout changes
 
 The demo is running in OpenShift, for reasons why see [here](#why-openshift).
 
@@ -38,7 +38,7 @@ arise after automating the first tasks:
 - Is it possible to fully automate the whole workflow of testing
   Ansible code and bringing it to production?
 
-Answering the questions above when starting with a blank page is
+Answering the questions above, when starting with a blank page is
 hard. There are multiple solutions and even more tools to achieve the
 desired result.
 
@@ -54,7 +54,7 @@ We use the following tools to implement our pipeline
 - [Gitea](https://gitea.io/en-us/):
   - Storing our Ansible code base and
   - our Ansible Controller configuration
-- [Tektion](https://tekton.dev/) for implementing our pipeline
+- [Tekton](https://tekton.dev/) for implementing our pipeline
 - [Ansible Controller](https://www.ansible.com/products/controller)
   for executing Ansible code
 
@@ -64,10 +64,21 @@ The goal is to onboard new teams to Automation Platform in an
 automated way. New teams should automatically get:
 
 - A tower organization with one admin user for that organization
+  - The admin user can onboard other users in his team
 - A GIT repository for storing Ansible Controller configuration
+  - Everything the team configures should be done via this repository
+  - Onboarding creates a Job template to apply the configuration
+- An opinionated pipeline that validates automation code before rollout
 - A GIT repository containing a sample Ansible collection that is
   validated by the pipeline described below
 
+Everything should be stored in GIT repositories:
+
+- The automation code use configure systems, network devices and so on
+- The configuration of Ansible Controller itself
+
+Teams on-boarded to Ansible Controller are responsible for those two
+repositories.
 
 ## Pipeline overview
 
@@ -95,22 +106,27 @@ Please see [here](#why-openshift) for an explanation.
 
 The basic idea is to implement the following developer workflow
 
-1. Developer checks out git repository with automation code
+1. Developer checks out GIT repository with automation code
 1. Developer creates feature branch in automation code repository
 1. Developer pushes feature branch to central repository
-1. Push trigger creates a separate feature environment in Automation Controller for testing the feature branch
+1. Push trigger creates a separate feature environment in Automation
+   Controller for testing the feature branch
 1. Developer modifies / extends automation code
-1. Developer commits automation code changes and pushes feature branch to Gitea
-1. Push triggers a pipeline run that verifies changes with _ansible-lint_
-1. Code can also be test by trigging the feature branch environment in Automation Controller
-1. If verification is ok, developer can open pull request to *DEV* branch
-1. If request is merged, Developer can delete feature branch
-1. Feature environment in Controller gets removed
-1. Push to *DEV* branch triggers a pipeline that executes a Automation
-   Controller Job Template that executes the code in the *DEV* branch
-   on test servers
-1. If Job Template execution did *NOT* produce any errors code is
-   automatically merged into the *PROD* branch.
+1. Developer commits automation code changes and pushes feature branch
+   to remote GIT repo
+1. Code can also be tested by triggering the feature branch
+   environment in Automation Controller
+1. If manual test are successful developer opens merge request to the *main* branch
+1. If merge request is accepted merge triggers a pipeline run
+1. Pipeline tests code with ansible-lint
+1. If ansible-lint returned no errors code is merged into development
+   branch by the pipeline
+1. Pipeline triggers a Job Template that configures all development hosts
+1. If Job template executes successful a pull request is opened to
+   production
+1. The pipeline stops at this point
+1. Merge request can be accepted and code is merge to production
+   branch
 
 This is just a very simple implementation of a possible pipeline but
 we think it demonstrates the basic building blocks required.
@@ -121,6 +137,10 @@ This basically means that we create a separate Project in Automation
 Controller that points to the git repository with the feature
 branch. Furthermore we also create a new Job Template that executes code
 in the feature branch on a number of selected hosts.
+
+Purpose of this feature environment is to enable code testing on
+dedicated development hosts. For example there is one dev host for
+every flavor of operating system we use (e.g. RHEL8 and RHEL9).
 
 ### Creating a new feature
 
@@ -329,7 +349,7 @@ A push into the main branch trigger the ansible pipeline.
 
 #### Step 6: Check the pipeline for errors
 
-If ansible-lint runs successfully the pipeline will automaticall merge
+If ansible-lint runs successfully the pipeline will automatically merge
 the code from the _main_ branch into into _development_ and trigger a run of the _Pipeline - SOE - Development hosts_ template.
 
 If the job succeeds successfully the pipeline creates a merge request
@@ -337,7 +357,7 @@ into production.
 
 #### Step 7: Check if a merge request into production is available
 
-If the pipeline run triggered in Step 5 is successfull the pipeline
+If the pipeline run triggered in Step 5 is successful the pipeline
 will automatically open a merge request to production.
 
 ### Step 8: Remove the feature branch
