@@ -1,5 +1,7 @@
 - name: Setup local cluster
   hosts: localhost
+  vars:
+    gitea_helm_version: v9.4.0
   roles:
     # Keep the order here!
     # It's also defined in meta/main.yml
