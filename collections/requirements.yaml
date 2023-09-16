@@ -1,8 +1,8 @@
 collections:
   - name: kubernetes.core
-    version: 2.3.2
+    version: 2.4.0
     source: https://galaxy.ansible.com
 
   - name: ansible.controller
-    version: 4.2.0
+    version: 4.4.2
     source: https://console.redhat.com/api/automation-hub/
