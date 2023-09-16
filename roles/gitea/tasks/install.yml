@@ -23,6 +23,7 @@
   kubernetes.core.helm_repository:
     name: gitea
     repo_url: https://dl.gitea.io/charts/
+    force_update: true
 
 - name: Create gitea namespace
   kubernetes.core.k8s:
@@ -69,7 +70,7 @@
     name: gitea
     release_namespace: "{{ gitea_namespace }}"
     chart_ref: gitea/gitea
-    chart_version: v6.0.0
+    chart_version: "{{ gitea_helm_version }}"
     values:
       gitea:
         config:
@@ -84,6 +85,8 @@
       #       add: ["SYS_CHROOT"]
       postgresql:
         enabled: true
+      postgresql-ha:
+        enabled: false
       memcached:
         enabled: false
   when: gitea_statefulset.resources | length < 1
