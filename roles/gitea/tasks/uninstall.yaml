@@ -1,0 +1,19 @@
+- name: Remove Gitea via helm
+  kubernetes.core.helm:
+    name: gitea
+    release_namespace: "{{ gitea_namespace }}"
+    chart_ref: gitea/gitea
+    chart_version: "{{ gitea_helm_version }}"
+    state: absent
+
+- name: Remove all PVC's
+  kubernetes.core.k8s:
+    state: absent
+    definition:
+      kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        namespace: "{{ gitea_namespace }}"
+
+- name: Remove all PVC's with oc
+  ansible.builtin.command: oc delete pvc --all
