@@ -144,6 +144,14 @@
     namespace: ansible-automation-platform
   register: controller_route
 
+- ansible.builtin.debug:
+    var: controller_password_secret
+    verbosity: 1
+
+- ansible.builtin.debug:
+    var: controller_route
+    verbosity: 1
+
 - name: Register fact with controller password
   ansible.builtin.set_fact:
     controller_password: "{{ controller_password_secret.resources[0].data.password | b64decode }}"
