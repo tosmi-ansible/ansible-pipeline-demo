@@ -85,6 +85,9 @@
       #       add: ["SYS_CHROOT"]
       postgresql:
         enabled: true
+        primary:
+          containerSecurityContext:
+            enabled: false
       postgresql-ha:
         enabled: false
       memcached:
