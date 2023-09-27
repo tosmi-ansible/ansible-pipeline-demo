@@ -1,4 +1,4 @@
-- name: Setup local cluster
+- name: Setup Ansible GitOps Demo
   hosts: localhost
   vars:
     gitea_helm_version: v9.4.0
