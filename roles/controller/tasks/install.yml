@@ -53,7 +53,7 @@
         name: ansible-automation-platform-operator
         namespace: ansible-automation-platform
       spec:
-        channel: stable-2.2
+        channel: stable-2.4
         installPlanApproval: Automatic
         name: ansible-automation-platform-operator
         source: redhat-operators
