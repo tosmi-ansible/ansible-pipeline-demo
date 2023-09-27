@@ -21,7 +21,7 @@
         name: openshift-pipelines-operator-rh
         namespace: openshift-operators
       spec:
-        channel: pipelines-1.7
+        channel: pipelines-1.9
         installPlanApproval: Automatic
         name: openshift-pipelines-operator-rh
         source: redhat-operators
@@ -32,7 +32,7 @@
   shell: kubectl get pods -o json -n openshift-pipelines -l app.kubernetes.io/component=webhook
   register: pipeline_kubectl_get_pods
   until: pipeline_kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
-  retries: 30
+  retries: 40
   delay: 3
 
 # checking for running pods has a race condition. if in the moment of the check
