@@ -146,8 +146,6 @@ every flavor of operating system we use (e.g. RHEL8 and RHEL9).
 
 ![Feature branch](images/feature_branch.drawio.png)
 
-
-
 ### Releasing a new feature
 
 ![Release feature](images/dev_prod.drawio.png)
