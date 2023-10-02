@@ -21,7 +21,7 @@
         status_code:
           - 201
         body_format: json
-        body: '{ "name": "Ansible Controller Token" }'
+        body: '{ "name": "Ansible Controller Token", "scopes": [ "write:repository" ] }'
         validate_certs: no
       register: gitea_created_developer_token
 
