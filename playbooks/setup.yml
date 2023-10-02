@@ -2,6 +2,7 @@
   hosts: localhost
   vars:
     gitea_helm_version: v9.4.0
+    aap_operator_channel: stable-2.4
   roles:
     # Keep the order here!
     # It's also defined in meta/main.yml
