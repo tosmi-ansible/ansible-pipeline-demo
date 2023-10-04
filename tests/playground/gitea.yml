@@ -1,4 +1,5 @@
-- hosts: localhost
+- name: Test playbook for gitea
+  hosts: localhost
   gather_facts: false
   vars:
     gitea_url: https://gitea.apps.ocp.lan.stderr.at
@@ -10,21 +11,25 @@
   tasks:
     - name: Query Gitea webhook
       ansible.builtin.uri:
-        url: "{{ gitea_url}}/api/v1/repos/developer/ansible-example-collection/hooks"
+        url: "{{ gitea_url }}/api/v1/repos/developer/ansible-example-collection/hooks"
         user: "{{ gitea_username }}"
         password: "{{ gitea_developer_password }}"
-        force_basic_auth: yes
+        force_basic_auth: true
         method: GET
-        validate_certs: no
+        validate_certs: false
       register: integration_gitea_webhook_query
 
-    - debug: msg="{{ integration_gitea_webhook_query.json }}"
+    - name: Dump webhook query response
+      ansible.builtin.debug:
+        msg: "{{ integration_gitea_webhook_query.json }}"
 
     - name: Business Card
-      set_fact:
-        hook_urls: "{{ integration_gitea_webhook_query.json | json_query(jmesquery) | join(' | ')}}"
+      ansible.builtin.set_fact:
+        hook_urls: "{{ integration_gitea_webhook_query.json | json_query(jmesquery) | join(' | ') }}"
 
-    - debug: var=hook_urls
+    - name: Print hook URL's'
+      ansible.builtin.debug:
+        var: hook_urls
 
     - name: Loop over
       ansible.builtin.set_fact:
@@ -37,9 +42,8 @@
         method: GET
         user: admin
         password: "{{ controller_password }}"
-        method: GET
-        force_basic_auth: yes
-        validate_certs: no
+        force_basic_auth: true
+        validate_certs: false
       register: integration_controller_webhook_key_query
 
     - name: Register fact with webhook key
@@ -48,30 +52,30 @@
 
     - name: Create Webhook to trigger Ansible Controller Job for creating feature environments
       ansible.builtin.uri:
-        url: "{{ gitea_url}}/api/v1/repos/developer/ansible-example-collection/hooks"
+        url: "{{ gitea_url }}/api/v1/repos/developer/ansible-example-collection/hooks"
         user: "{{ gitea_username }}"
         password: "{{ gitea_developer_password }}"
-        force_basic_auth: yes
+        force_basic_auth: true
         method: POST
         status_code:
           - 201
         body_format: json
-        body: "{{ lookup('ansible.builtin.template','gitea-controller-webhook.json.j2') }}"
-        validate_certs: no
+        body: "{{ lookup('ansible.builtin.template', 'gitea-controller-webhook.json.j2') }}"
+        validate_certs: false
       when:
         - not integration_gitea_webhook_defined
 
     - name: Create Webhook to trigger Ansible Controller Job for creating feature environments
       ansible.builtin.uri:
-        url: "{{ gitea_url}}/api/v1/repos/developer/ansible-example-collection/hooks"
+        url: "{{ gitea_url }}/api/v1/repos/developer/ansible-example-collection/hooks"
         user: "{{ gitea_username }}"
         password: "{{ gitea_developer_password }}"
-        force_basic_auth: yes
+        force_basic_auth: true
         method: POST
         status_code:
           - 201
         body_format: json
-        body: "{{ lookup('ansible.builtin.template','gitea-controller-webhook.json.j2') }}"
-        validate_certs: no
+        body: "{{ lookup('ansible.builtin.template', 'gitea-controller-webhook.json.j2') }}"
+        validate_certs: false
       when:
         - not integration_gitea_webhook_defined
