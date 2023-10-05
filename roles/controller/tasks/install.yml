@@ -60,12 +60,27 @@
         sourceNamespace: openshift-marketplace
 
 # Stolen from https://stackoverflow.com/questions/53198576/ansible-playbook-wait-until-all-pods-running
-- name: Wait for Ansible platform operator pods to be running
-  ansible.builtin.shell: kubectl get pods -o json -n ansible-automation-platform
-  register: kubectl_get_pods
-  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+# - name: Wait for Ansible platform operator pods to be running
+#   ansible.builtin.shell: kubectl get pods -o json -n ansible-automation-platform
+#   register: kubectl_get_pods
+#   until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+#   retries: 20
+#   delay: 3
+
+- name: Check status of automation platform deployment
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    label_selectors: app.kubernetes.io/component=automationcontroller
+    namespace: ansible-automation-platform
+  register: controller_status
+  until: controller_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length == 2
   retries: 20
   delay: 3
+
+- debug:
+    verbosity: 1
+    msg:
+      - "Automation controller deployments ready: {{ controller_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length }}"
 
 - name: Check if we have an aws gp2-csi storage class available
   kubernetes.core.k8s_info:
