@@ -4,7 +4,6 @@
     method: GET
     user: admin
     password: "{{ controller_password }}"
-    method: GET
     force_basic_auth: yes
     validate_certs: no
   register: controller_subscription_state_query
