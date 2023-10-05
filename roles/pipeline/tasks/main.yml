@@ -9,7 +9,7 @@
 
 - name: Register fact integration_gitea_developer_token
   ansible.builtin.set_fact:
-    pipeline_gitea_developer_token: "{{ pipeline_gitea_developer_token_secret.resources[0].data.token | b64decode}}"
+    pipeline_gitea_developer_token: "{{ pipeline_gitea_developer_token_secret.resources[0].data.token | b64decode }}"
 
 - name: Install the OpenShift Pipelines operator
   kubernetes.core.k8s:
@@ -27,19 +27,23 @@
         source: redhat-operators
         sourceNamespace: openshift-marketplace
 
-# filter for pods with a specific label, as there are jobs in the state 'Completed'
-- name: Wait for openshift-pipelines pods to be running
-  shell: kubectl get pods -o json -n openshift-pipelines -l app.kubernetes.io/component=webhook
-  register: pipeline_kubectl_get_pods
-  until: pipeline_kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
-  retries: 40
-  delay: 3
+- name: Check status of pipelines deployment
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    label_selectors: app.kubernetes.io/component=webhook
+    namespace: openshift-pipelines
+  register: pipelines_status
+  until: pipelines_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length == 2
 
-# checking for running pods has a race condition. if in the moment of the check
-# all pods are running we continue, even if pods are currently being scheduled
-- name: Pause for 2 minutes to give the pipeline time to finish startup
-  ansible.builtin.pause:
-    minutes: 2
+- debug:
+    msg: "Pipelines deployments ready: {{ pipelines_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length }}"
+    verbosity: 2
+
+# # checking for running pods has a race condition. if in the moment of the check
+# # all pods are running we continue, even if pods are currently being scheduled
+# - name: Pause for 2 minutes to give the pipeline time to finish startup
+#   ansible.builtin.pause:
+#     minutes: 2
 
 - name: Create a namespace for the ansible-pipeline
   kubernetes.core.k8s:
@@ -56,7 +60,7 @@
     src: git-clone.yaml
     namespace: ansible-pipeline
 
-- name: Create secret for push to the examples collection
+- name: Create secret for pushing to the examples collection
   kubernetes.core.k8s:
     state: present
     namespace: ansible-pipeline
@@ -70,9 +74,14 @@
   loop:
     - ansible-staging-pull-request.yml
     - ansible-staging-pipeline.yml
-    - ansible-staging-merge-task.yml
     - ansible-staging-controller-job-task.yml
     - ansible-staging-triggertemplate.yml
     - ansible-staging-lint-task.yml
+    - ansible-staging-molecule-task.yml
     - ansible-staging-triggerbinding.yml
     - ansible-staging-eventlistener.yml
+    - ansible-feature-pipeline.yml
+    - ansible-feature-triggerbinding.yml
+    - ansible-feature-request-task.yml
+    - ansible-feature-triggertemplate.yml
+    - ansible-feature-eventlistener.yml
