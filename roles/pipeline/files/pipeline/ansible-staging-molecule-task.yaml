@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: ansible-molecule
+  namespace: ansible-pipeline
+  labels:
+    app.kubernetes.io/version: "0.1"
+spec:
+  description: >-
+    Run ansible molecule tests
+  workspaces:
+    - name: output
+      description: Directory containing a the ansible files to be linted
+  steps:
+    - name: molecule
+      image: quay.io/ansible/creator-ee:v0.9.7
+      env:
+      - name: WORKSPACE_OUTPUT_PATH
+        value: $(workspaces.output.path)
+      script: |
+        #!/usr/bin/env sh
+
+        set -eu -o pipefail
+
+        echo "##################################"
+        echo "#                                #"
+        echo "# We could trigger molecule here #"
+        echo "#                                #"
+        echo "##################################"

@@ -6,11 +6,13 @@ metadata:
 spec:
   serviceAccountName: pipeline
   triggers:
+
     - name: trigger
       bindings:
         - ref: ansible-staging-triggerbinding
       template:
         ref: ansible-staging
+
     # - name: trigger
     #   bindings:
     #     - ref: gitea-triggerbinding

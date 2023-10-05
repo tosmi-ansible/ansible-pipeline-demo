@@ -1,0 +1,62 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: ansible-merge-feature
+  namespace: ansible-pipeline
+spec:
+  params:
+    - name: git-revision-before
+      description: Git Revision before
+    - name: git-revision-after
+      description: Git Revision after
+    - name: git-repository-url
+      description: The git repository url
+    - name: git-ref
+      description: The ref that triggered this run
+
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: ansible-feature-
+      spec:
+        pipelineRef:
+          name: ansible-feature
+        params:
+          - name: repository
+            value: $(tt.params.git-repository-url)
+          - name: ref
+            value: $(tt.params.git-ref)
+        workspaces:
+          - name: ansible-lint-ws
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 200Mi
+          - name: git-credentials-ws
+            secret:
+              secretName: ansible-staging-git-basic-auth
+
+    # - apiVersion: tekton.dev/v1beta1
+    #   kind: TaskRun
+    #   metadata:
+    #     generateName: ansible-merge-feature-
+    #   spec:
+    #     taskRef:
+    #       name: ansible-create-merge-request
+    #     params:
+    #       - name: repository
+    #         value: $(tt.params.git-repository-url)
+    #       # - name: before
+    #         value: $(tt.params.git-revision.before)
+    #       # - name: after
+    #       #   value: $(tt.params.git-revision.after)
+    #       - name: head
+    #         value: $(tt.params.git-ref)
+    #     workspaces:
+    #       - name: basic-auth
+    #         secret:
+    #           secretName: ansible-staging-git-basic-auth

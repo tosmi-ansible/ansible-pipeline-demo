@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: ansible-staging
+  name: ansible-feature
   namespace: ansible-pipeline
 spec:
   workspaces:
@@ -12,13 +12,15 @@ spec:
       type: string
       description: The URL to the repository
       default: http://does-not-exist
+    - name: ref
+      type: string
   tasks:
     - name: git-clone
       params:
         - name: url
+          # value: "$(params.repository)"
           # temp use fixed url to repo, the public url (route) uses a tmp certificate
           value: http://gitea-http.gitea:3000/developer/ansible-example-collection.git
-          # value: "$(params.repository)"
         - name: revision
           value: main
         - name: depth
@@ -30,7 +32,6 @@ spec:
           workspace: ansible-lint-ws
         - name: basic-auth
           workspace: git-credentials-ws
-
     - name: ansible-lint
       taskRef:
         name: ansible-lint
@@ -39,45 +40,14 @@ spec:
           workspace: ansible-lint-ws
       runAfter:
         - git-clone
-
-    - name: run-molecule
+    - name: create-merge-request
+      params:
+        - name: head
+          value: $(params.ref)
       taskRef:
-        name: ansible-molecule
+        name: create-merge-request
       workspaces:
-        - name: output
-          workspace: ansible-lint-ws
-      runAfter:
-        - ansible-lint
-
-    - name: merge-to-dev
-      taskRef:
-        name: git-merge
-      workspaces:
-        - name: output
-          workspace: ansible-lint-ws
         - name: basic-auth
           workspace: git-credentials-ws
       runAfter:
-        - run-molecule
-
-    - name: controller-job
-      params:
-        - name: controller-url
-          value: http://ctrl-service.ansible-automation-platform
-        - name: controller-job-name
-          value: "Pipeline - SOE - Development hosts"
-      taskRef:
-        name: controller-job
-      runAfter:
-        - merge-to-dev
-
-    - name: pull-request-to-prod
-      params:
-        - name: sourceBranch
-          value: development
-        - name: destinationBranch
-          value: production
-      taskRef:
-        name: pull-request
-      runAfter:
-        - controller-job
+        - ansible-lint

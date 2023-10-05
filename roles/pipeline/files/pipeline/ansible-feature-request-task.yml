@@ -1,0 +1,115 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: create-merge-request
+  namespace: ansible-pipeline
+  labels:
+    app.kubernetes.io/version: "0.1"
+spec:
+  description: >-
+    Create a new merge request
+  workspaces:
+    - name: basic-auth
+      optional: true
+      description: |
+        A Workspace containing a .gitconfig and .git-credentials file. These
+        will be copied to the user's home before any git commands are run. Any
+        other files in this Workspace are ignored. It is strongly recommended
+        to use ssh-directory over basic-auth whenever possible and to bind a
+        Secret to this Workspace over other volume types.
+  params:
+    - name: base
+      description: The Branch we want to merge
+      type: string
+      default: "main"
+    - name: head
+      description: Source branch for the merge request
+      type: string
+      default: "feature/does-not-exist"
+    - name: body
+      type: string
+      description: |
+        Long description of merge request
+      default: "Pipeline triggered merge request"
+    - name: title
+      type: string
+      description: |
+        Title of the merge request
+      default: "Pipeline triggered merge request"
+    - name: verbose
+      description: "Log commands that are executed during merge operation."
+      type: string
+      default: "true"
+    - name: userHome
+      description: |
+        Absolute path to the user's home directory.
+      type: string
+      default: "/root"
+  steps:
+    - name: merge-request
+      image: registry.access.redhat.com/ubi9/ubi:9.2-755
+      env:
+      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND
+        value: $(workspaces.basic-auth.bound)
+      - name: WORKSPACE_BASIC_AUTH_DIRECTORY_PATH
+        value: $(workspaces.basic-auth.path)
+      - name: PARAM_VERBOSE
+        value: $(params.verbose)
+      - name: PARAM_BASE
+        value: $(params.base)
+      - name: PARAM_HEAD
+        value: $(params.head)
+      - name: PARAM_BODY
+        value: $(params.body)
+      - name: PARAM_TITLE
+        value: $(params.title)
+      - name: PARAM_USER_HOME
+        value: $(params.userHome)
+      script: |
+        #!/usr/bin/env sh
+        set -eu -o pipefail
+
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
+
+        if [ "${WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND}" = "true" ] ; then
+          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.git-credentials" "${PARAM_USER_HOME}/.git-credentials"
+          cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.gitconfig" "${PARAM_USER_HOME}/.gitconfig"
+          chmod 400 "${PARAM_USER_HOME}/.git-credentials"
+          chmod 400 "${PARAM_USER_HOME}/.gitconfig"
+
+          GIT_CREDENTIALS_URL=$(cat "${PARAM_USER_HOME}/.git-credentials")
+        else
+          echo "Git credentials not available"
+          exit 1
+        fi
+
+        env
+
+        # remove refs/heads/ from PARAM_HEAD if this is a push
+        PARAM_HEAD=$(echo $PARAM_HEAD | awk  '{  sub("refs/heads/",""); print $0 }')
+
+        # curl -kv -XPOST -H "Content-Type: application/json" https://developer:${GIT_CREDENTIALS}@gitea.apps.hub.aws.tntinfra.net/api/v1/repos/developer/ansible-example-collection/pulls -d '{ "base": "main", "body": "test pr", "head": "production", "title": "test title" }'
+
+        STATUS=$(curl -ksqo /dev/null \
+                   -w "%{http_code}" \
+                   -XPOST \
+                   -H "Content-Type: application/json" \
+                   ${GIT_CREDENTIALS_URL}/api/v1/repos/developer/ansible-example-collection/pulls \
+                   -d "{ \"base\": \"main\", \"body\": \"Merge ${PARAM_HEAD} into main\", \"head\": \"$PARAM_HEAD\", \"title\": \"Merge $PARAM_HEAD into main\" }")
+
+        case $STATUS in
+          201)
+            echo "Successfully create merge request from ${PARAM_HEAD} into main."
+            ;;
+          404)
+            echo "Gitea return NOT FOUND (404) for merging branch ${PARAM_HEAD} into main."
+            ;;
+          409)
+            echo "Merge request from ${PARAM_HEAD} into main already exists."
+            ;;
+          *)
+            echo "Gitea HTTP response code ${STATUS}."
+            ;;
+        esac
