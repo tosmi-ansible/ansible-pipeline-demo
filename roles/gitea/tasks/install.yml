@@ -52,11 +52,11 @@
         name: default
         namespace: gitea
 
-- name: Check if the Gitea statefulset is already available
+- name: Check if the Gitea PostgreSQL statefulset is already available
   kubernetes.core.k8s_info:
     api_version: apps/v1
     kind: StatefulSet
-    name: gitea
+    name: gitea-postgresql
     namespace: "{{ gitea_namespace }}"
   register: gitea_statefulset
 
@@ -92,7 +92,8 @@
         enabled: false
       memcached:
         enabled: false
-  when: gitea_statefulset.resources | length < 1
+  when:
+    - gitea_statefulset.resources | length < 1
 
 - name: Create OpenShift route
   kubernetes.core.k8s:
