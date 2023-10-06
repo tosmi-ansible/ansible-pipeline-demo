@@ -34,9 +34,12 @@
     namespace: openshift-pipelines
   register: pipelines_status
   until: pipelines_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length == 2
+  retries: 30
+  delay: 3
 
-- debug:
-    msg: "Pipelines deployments ready: {{ pipelines_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length }}"
+- name: Print number of deployments ready
+  ansible.builtin.debug:
+    msg: "Pipelines deployments ready: {{ pipelines_status.resources | json_query('[*].status.readyReplicas') | select('match', '1') | list | length }}"
     verbosity: 2
 
 # # checking for running pods has a race condition. if in the moment of the check
@@ -66,22 +69,29 @@
     namespace: ansible-pipeline
     definition: "{{ lookup('template', 'ansible-staging-git-basicauth-secret.yml.j2') | from_yaml }}"
 
+- name: Find all pipelines files
+  ansible.builtin.find:
+    paths: "{{ playbook_dir }}/roles/pipeline/files/pipeline"
+    file_type: file
+    recurse: false
+  register: pipeline_files
+
 - name: Create pipeline objects
   kubernetes.core.k8s:
     state: present
-    src: "pipeline/{{ item }}"
+    src: "{{ item }}"
     namespace: ansible-pipeline
-  loop:
-    - ansible-staging-pull-request.yml
-    - ansible-staging-pipeline.yml
-    - ansible-staging-controller-job-task.yml
-    - ansible-staging-triggertemplate.yml
-    - ansible-staging-lint-task.yml
-    - ansible-staging-molecule-task.yml
-    - ansible-staging-triggerbinding.yml
-    - ansible-staging-eventlistener.yml
-    - ansible-feature-pipeline.yml
-    - ansible-feature-triggerbinding.yml
-    - ansible-feature-request-task.yml
-    - ansible-feature-triggertemplate.yml
-    - ansible-feature-eventlistener.yml
+  loop: "{{ pipeline_files.files | map(attribute='path') | list }}"
+    # - ansible-staging-pull-request.yml
+    # - ansible-staging-pipeline.yml
+    # - ansible-staging-controller-job-task.yml
+    # - ansible-staging-triggertemplate.yml
+    # - ansible-staging-lint-task.yml
+    # - ansible-staging-molecule-task.yml
+    # - ansible-staging-triggerbinding.yml
+    # - ansible-staging-eventlistener.yml
+    # - ansible-feature-pipeline.yml
+    # - ansible-feature-triggerbinding.yml
+    # - ansible-feature-request-task.yml
+    # - ansible-feature-triggertemplate.yml
+    # - ansible-feature-eventlistener.yml
