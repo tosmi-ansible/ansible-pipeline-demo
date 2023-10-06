@@ -1,15 +1,16 @@
-- name: Check if {{ gitea_username }} already exists
+---
+- name: "Check if gitea user already exists"
   ansible.builtin.uri:
-    url: "{{ gitea_url}}/{{ gitea_username }}"
+    url: "{{ gitea_url }}/{{ gitea_username }}"
     method: GET
     status_code:
       - 200 # user exists
       - 404 # user does not exist
-    validate_certs: no
+    validate_certs: false
   register: gitea_user_query
 
 - name: Print git_user_query response
-  debug:
+  ansible.builtin.debug:
     var: "{{ gitea_user_query }}"
     verbosity: 2
 
@@ -18,118 +19,116 @@
     gitea_user_registered: "{{ gitea_user_query.status | int == 200 }}"
 
 - name: Print git_user_query response
-  debug:
+  ansible.builtin.debug:
     var: "{{ gitea_user_registered }}"
     verbosity: 2
 
 - name: Create Gitea user and push template if user is not registered
+  when: not gitea_user_registered
   block:
-  - name: Generate a password for the gitea user {{ gitea_username }} if not specified
-    ansible.builtin.set_fact:
-      gitea_developer_password: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
-    when:
-      - gitea_developer_password is not defined
 
-  - name: Store the developer password in a Kubernetes secret
-    kubernetes.core.k8s:
-      state: present
-      definition:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: gitea-developer-password
-          namespace: "{{ gitea_namespace }}"
-        data:
-          password: "{{ gitea_developer_password | b64encode }}"
+    - name: Generate a password for the gitea user not specified
+      ansible.builtin.set_fact:
+        gitea_developer_password: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
+      when:
+        - gitea_developer_password is not defined
 
-  - name: Create fact for URL with authentication information
-    ansible.builtin.set_fact:
-      gitea_url_auth: "https://{{ gitea_username}}:{{ gitea_developer_password }}@{{ gitea_route.resources[0].spec.host }}"
+    - name: Store the developer password in a Kubernetes secret
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: gitea-developer-password
+            namespace: "{{ gitea_namespace }}"
+          data:
+            password: "{{ gitea_developer_password | b64encode }}"
 
-  - name: Create a gitea user
-    ansible.builtin.uri:
-      url: "{{ gitea_url}}/user/sign_up"
-      method: POST
-      body_format: form-urlencoded
-      body:
-        user_name: "{{ gitea_username }}"
-        email: "{{ gitea_email}}"
-        password: "{{ gitea_developer_password}}"
-        retype: "{{ gitea_developer_password }}"
-      status_code:
-        - 303 # user sucessfully created
-      validate_certs: no
+    - name: Create fact for URL with authentication information
+      ansible.builtin.set_fact:
+        gitea_url_auth: "https://{{ gitea_username }}:{{ gitea_developer_password }}@{{ gitea_route.resources[0].spec.host }}"
 
-  - name: Create temporary checkout directory
-    ansible.builtin.tempfile:
-      state: directory
-      suffix: checkout
-    register: checkout_dir
+    - name: Create a gitea user
+      ansible.builtin.uri:
+        url: "{{ gitea_url }}/user/sign_up"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          user_name: "{{ gitea_username }}"
+          email: "{{ gitea_email }}"
+          password: "{{ gitea_developer_password }}"
+          retype: "{{ gitea_developer_password }}"
+        status_code:
+          - 303 # user sucessfully created
+        validate_certs: false
 
-  - name: Clone example Ansible code repository to tmp folder
-    ansible.builtin.git:
-      repo: https://github.com/rhatservices/ansible-example-collection
-      dest: "{{ checkout_dir.path }}"
+    - name: Create temporary checkout directory
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: checkout
+      register: checkout_dir
 
-  - name: Create remote Gitea repository
-    ansible.builtin.uri:
-      url: "{{ gitea_url}}/api/v1/user/repos"
-      user: "{{ gitea_username }}"
-      password: "{{ gitea_developer_password }}"
-      force_basic_auth: yes
-      method: POST
-      status_code:
-        - 201
-        - 409
-      body_format: json
-      body: "{{ lookup('ansible.builtin.file','gitea-repo.json') }}"
-      validate_certs: no
+    - name: Clone example Ansible code repository to tmp folder
+      ansible.builtin.git:
+        repo: https://github.com/rhatservices/ansible-example-collection
+        dest: "{{ checkout_dir.path }}"
 
-  - name: Create a local development branch
-    ansible.builtin.command: git -c http.sslVerify=false checkout -b development
-    args:
-      chdir: "{{ checkout_dir.path }}"
+    - name: Create remote Gitea repository
+      ansible.builtin.uri:
+        url: "{{ gitea_url }}/api/v1/user/repos"
+        user: "{{ gitea_username }}"
+        password: "{{ gitea_developer_password }}"
+        force_basic_auth: true
+        method: POST
+        status_code:
+          - 201
+          - 409
+        body_format: json
+        body: "{{ lookup('ansible.builtin.file', 'gitea-repo.json') }}"
+        validate_certs: false
 
-  - name: Create a local production branch
-    ansible.builtin.command: git -c http.sslVerify=false checkout -b production
-    args:
-      chdir: "{{ checkout_dir.path }}"
+    - name: Create a local development branch
+      ansible.builtin.command: git -c http.sslVerify=false checkout -b development
+      args:
+        chdir: "{{ checkout_dir.path }}"
 
-  - name: Add Gitea as a new remote
-    ansible.builtin.command: git -c http.sslVerify=false remote add gitea "{{ gitea_url_auth }}/{{ gitea_username }}/ansible-example-collection.git"
-    args:
-      chdir: "{{ checkout_dir.path }}"
+    - name: Create a local production branch
+      ansible.builtin.command: git -c http.sslVerify=false checkout -b production
+      args:
+        chdir: "{{ checkout_dir.path }}"
 
-  - name: Push all branches to gitea
-    ansible.builtin.command: git -c http.sslVerify=false push --all gitea
-    args:
-      chdir: "{{ checkout_dir.path }}"
+    - name: Add Gitea as a new remote
+      ansible.builtin.command: git -c http.sslVerify=false remote add gitea "{{ gitea_url_auth }}/{{ gitea_username }}/ansible-example-collection.git"
+      args:
+        chdir: "{{ checkout_dir.path }}"
 
-  # - name: Delete temporary checkout directory
-  #   ansible.builtin.file:
-  #     state: absent
-  #     path: "{{ checkout_dir.path }}"
-  #   when: checkout_dir.path is defined
+    - name: Push all branches to gitea
+      ansible.builtin.command: git -c http.sslVerify=false push --all gitea
+      args:
+        chdir: "{{ checkout_dir.path }}"
 
-  when:
-    - not gitea_user_registered
+    - name: Delete temporary checkout directory
+      ansible.builtin.file:
+        state: absent
+        path: "{{ checkout_dir.path }}"
+      when: checkout_dir.path is defined
 
 - name: Get developer information
+  when: gitea_user_registered
   block:
 
-  - name: Read the developer password from the corresponding K8s secret
-    kubernetes.core.k8s_info:
-      api_version: v1
-      kind: Secret
-      name: gitea-developer-password
-      namespace: "{{ gitea_namespace }}"
-    register: gitea_developer_password_secret
+    - name: Read the developer password from the corresponding K8s secret
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: gitea-developer-password
+        namespace: "{{ gitea_namespace }}"
+      register: gitea_developer_password_secret
 
-  - name: Register fact gitea_developer_password
-    ansible.builtin.set_fact:
-      gitea_developer_password: "{{ gitea_developer_password_secret.resources[0].data.password | b64decode}}"
+    - name: Register fact gitea_developer_password
+      ansible.builtin.set_fact:
+        gitea_developer_password: "{{ gitea_developer_password_secret.resources[0].data.password | b64decode }}"
 
-  when:
-    - gitea_user_registered
-
-- ansible.builtin.include_tasks: token.yml
+- name: Include tasks to create a token
+  ansible.builtin.include_tasks: token.yml

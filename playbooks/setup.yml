@@ -1,3 +1,4 @@
+---
 - name: Setup Ansible GitOps Demo
   hosts: localhost
   vars:
@@ -25,17 +26,17 @@
     - name: Print Ansible Controller information
       ansible.builtin.debug:
         msg:
-        - "Ansible Controller user    : admin"
-        - "Ansible Controller password: {{ controller_password }}"
-        - "Ansible Controller URL     : {{ controller_url }}"
-        - "Ansible Controller Token   : {{ controller_oauthtoken | default('Undefined: add a subscription') }}"
+          - "Ansible Controller user    : admin"
+          - "Ansible Controller password: {{ controller_password }}"
+          - "Ansible Controller URL     : {{ controller_url }}"
+          - "Ansible Controller Token   : {{ controller_oauthtoken | default('Undefined: add a subscription') }}"
       when:
         - controller_url is defined
 
     - name: Remember user to add an Ansible Controller subscriptions
       ansible.builtin.debug:
         msg:
-        - "Go to {{ controller_url }} and add a subscription!"
-        - "After adding the subscription execute 'make controller-content"
+          - "Go to {{ controller_url }} and add a subscription!"
+          - "After adding the subscription execute 'make controller-content"
       when:
         - not controller_subscription_installed | bool
