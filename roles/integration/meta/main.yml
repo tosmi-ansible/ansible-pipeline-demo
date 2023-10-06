@@ -50,3 +50,4 @@ galaxy_info:
 dependencies:
   - gitea
   - controller
+  - pipeline
