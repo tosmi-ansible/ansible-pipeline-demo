@@ -74,7 +74,7 @@
     namespace: ansible-automation-platform
   register: controller_status
   until: controller_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length == 2
-  retries: 20
+  retries: 30
   delay: 3
 
 - debug:
