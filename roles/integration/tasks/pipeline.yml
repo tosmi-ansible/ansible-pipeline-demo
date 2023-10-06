@@ -1,3 +1,4 @@
+---
 - name: Read the developer token from the corresponding K8s secret
   kubernetes.core.k8s_info:
     api_version: v1
@@ -8,7 +9,7 @@
 
 - name: Register fact integration_gitea_developer_token
   ansible.builtin.set_fact:
-    integration_gitea_developer_token: "{{ integration_gitea_developer_token_secret.resources[0].data.token | b64decode}}"
+    integration_gitea_developer_token: "{{ integration_gitea_developer_token_secret.resources[0].data.token | b64decode }}"
 
 - name: Store the developer token in a Kubernetes secret
   kubernetes.core.k8s:

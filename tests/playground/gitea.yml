@@ -33,7 +33,7 @@
 
     - name: Loop over
       ansible.builtin.set_fact:
-        integration_gitea_webhook_pipeline_defined: "{{ hook_urls | regex_search('el-ansible-staging-ansible-pipeline') is not none }}"
+        integration_gitea_webhook_pipeline_defined: "{{ hook_urls | regex_search('el-ansible-staging') is not none }}"
         integration_gitea_webhook_controller_defined: "{{ hook_urls | regex_search('ctrl-service') is not none }}"
 
     - name: Query controller for webhook key

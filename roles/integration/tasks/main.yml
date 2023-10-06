@@ -1,4 +1,7 @@
 ---
 # tasks file for integration
-- ansible.builtin.include_tasks: gitea.yml
-- ansible.builtin.include_tasks: pipeline.yml
+- name: Integrate gitea
+  ansible.builtin.include_tasks: gitea.yml
+
+- name: Integrate pipeline
+  ansible.builtin.include_tasks: pipeline.yml
