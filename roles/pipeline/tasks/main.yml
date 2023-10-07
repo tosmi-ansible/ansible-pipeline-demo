@@ -57,12 +57,6 @@
       metadata:
         name: ansible-pipeline
 
-- name: Import git-clone task
-  kubernetes.core.k8s:
-    state: present
-    src: git-clone.yaml
-    namespace: ansible-pipeline
-
 - name: Create secret for pushing to the examples collection
   kubernetes.core.k8s:
     state: present
