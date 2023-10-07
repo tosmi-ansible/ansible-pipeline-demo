@@ -22,7 +22,7 @@ spec:
           # temp use fixed url to repo, the public url (route) uses a tmp certificate
           value: http://gitea-http.gitea:3000/developer/ansible-example-collection.git
         - name: revision
-          value: main
+          value: $(params.ref)
         - name: depth
           value: "0"
       taskRef:
