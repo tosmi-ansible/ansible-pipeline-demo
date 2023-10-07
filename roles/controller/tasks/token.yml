@@ -1,3 +1,4 @@
+---
 - name: Check if secret for accessing Ansible Controller already exists
   kubernetes.core.k8s_info:
     api_version: v1
@@ -13,32 +14,31 @@
     - controller_token_check.resources | length > 0
 
 - name: Create controller OAUTH token and secret
+  when: controller_token_check.resources | length == 0
   block:
 
-  - name: Create an authentication token
-    ansible.controller.token:
-      description: "Pipeline - authentication token"
-      scope: write
-      controller_username: admin
-      controller_password: "{{ controller_password }}"
-      controller_host: "{{ controller_url }}"
-      validate_certs: no
-    register: controller_token_response
+    - name: Create an authentication token
+      ansible.controller.token:
+        description: "Pipeline - authentication token"
+        scope: write
+        controller_username: admin
+        controller_password: "{{ controller_password }}"
+        controller_host: "{{ controller_url }}"
+        validate_certs: false
+      register: controller_token_response
 
-  - name: Create a reusable fact with the token
-    ansible.builtin.set_fact:
-      controller_token: "{{ controller_token_response.ansible_facts.controller_token.token }}"
+    - name: Create a reusable fact with the token
+      ansible.builtin.set_fact:
+        controller_token: "{{ controller_token_response.ansible_facts.controller_token.token }}"
 
-  - name: Create secret for accessing Ansible Controller API
-    kubernetes.core.k8s:
-      state: present
-      definition:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: automation-controller-token
-          namespace: ansible-pipeline
-        data:
-          token: "{{ controller_token | b64encode }}"
-  when:
-    - controller_token_check.resources | length == 0
+    - name: Create secret for accessing Ansible Controller API
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: automation-controller-token
+            namespace: ansible-pipeline
+          data:
+            token: "{{ controller_token | b64encode }}"

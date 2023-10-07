@@ -1,11 +1,12 @@
+---
 - name: Query controller for subscription status
   ansible.builtin.uri:
     url: "{{ controller_url }}/api/v2/settings/system/"
     method: GET
     user: admin
     password: "{{ controller_password }}"
-    force_basic_auth: yes
-    validate_certs: no
+    force_basic_auth: true
+    validate_certs: false
   register: controller_subscription_state_query
 
 - name: Register a fact for the subscription status
@@ -13,16 +14,16 @@
     controller_subscription_installed: "{{ controller_subscription_state_query.json.LICENSE.sku is defined }}"
 
 - name: Print a helpful message and fail if not subscription is available
+  when: not controller_subscription_installed
   block:
 
     - name: Print Ansible Controller information
       ansible.builtin.debug:
         msg:
-        - "Ansible Controller user    : admin"
-        - "Ansible Controller password: {{ controller_password }}"
-        - "Ansible Controller URL     : {{ controller_url }}"
+          - "Ansible Controller user    : admin"
+          - "Ansible Controller password: {{ controller_password }}"
+          - "Ansible Controller URL     : {{ controller_url }}"
 
     - name: Fail if we need a subscription
       ansible.builtin.fail:
         msg: "Failing because you need to add subscription to the controller, for logging into the controller the message above. Run 'make setup' again after adding a subscription!"
-  when: not controller_subscription_installed

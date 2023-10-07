@@ -8,7 +8,7 @@
     controller_username: admin
     controller_password: "{{ controller_password }}"
     controller_host: "{{ controller_url }}"
-    validate_certs: no
+    validate_certs: false
 
 # - name: Create a GIT credentials for accessing the Gitea repository
 #   ansible.controller.credential:
@@ -23,7 +23,7 @@
 #     controller_username: admin
 #     controller_password: "{{ controller_password }}"
 #     controller_host: "{{ controller_url }}"
-#     validate_certs: no
+#     validate_certs: false
 #   when:
 #     - gitea_developer_token is defined
 
@@ -33,15 +33,15 @@
     description: SOE repository DEV branch
     state: present
     organization: Pipeline
-    scm_url: "{{ gitea_url}}/{{ gitea_username }}/ansible-example-collection"
+    scm_url: "{{ gitea_url }}/{{ gitea_username }}/ansible-example-collection"
     scm_type: git
     scm_branch: development
-    scm_update_on_launch: yes
+    scm_update_on_launch: true
     # controller variables
     controller_username: admin
     controller_password: "{{ controller_password }}"
     controller_host: "{{ controller_url }}"
-    validate_certs: no
+    validate_certs: false
 
 - name: Create a project for our production branch
   ansible.controller.project:
@@ -49,15 +49,15 @@
     description: SOE repository PROD branch
     state: present
     organization: Pipeline
-    scm_url: "{{ gitea_url}}/{{ gitea_username }}/ansible-example-collection"
+    scm_url: "{{ gitea_url }}/{{ gitea_username }}/ansible-example-collection"
     scm_type: git
     scm_branch: production
-    scm_update_on_launch: yes
+    scm_update_on_launch: true
     # controller variables
     controller_username: admin
     controller_password: "{{ controller_password }}"
     controller_host: "{{ controller_url }}"
-    validate_certs: no
+    validate_certs: false
 
 - name: Create a job template for configuring development hosts
   ansible.controller.job_template:
@@ -72,7 +72,7 @@
     controller_username: admin
     controller_password: "{{ controller_password }}"
     controller_host: "{{ controller_url }}"
-    validate_certs: no
+    validate_certs: false
 
 - name: Create a job template for configuring production hosts
   ansible.controller.job_template:
@@ -87,7 +87,7 @@
     controller_username: admin
     controller_password: "{{ controller_password }}"
     controller_host: "{{ controller_url }}"
-    validate_certs: no
+    validate_certs: false
 
 - name: Create a job template for configuring feature environments
   ansible.controller.job_template:
@@ -102,7 +102,7 @@
     controller_username: admin
     controller_password: "{{ controller_password }}"
     controller_host: "{{ controller_url }}"
-    validate_certs: no
+    validate_certs: false
     webhook_service: github
     extra_vars:
       controller_url: "{{ controller_url }}"

@@ -41,7 +41,7 @@
         namespace: ansible-automation-platform
       spec:
         targetNamespaces:
-        - ansible-automation-platform
+          - ansible-automation-platform
 
 - name: Create Subscription for the Ansible platform operator
   kubernetes.core.k8s:
@@ -67,20 +67,21 @@
 #   retries: 20
 #   delay: 3
 
-- name: Check status of automation platform deployment
+- name: Check status of automation controller operator
   kubernetes.core.k8s_info:
     kind: Deployment
-    label_selectors: app.kubernetes.io/component=automationcontroller
+    name: automation-controller-operator-controller-manager
     namespace: ansible-automation-platform
-  register: controller_status
-  until: controller_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length == 2
+  register: controller_operator_status
+  until: controller_operator_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length == 1
   retries: 30
   delay: 3
 
-- debug:
+- name: Print number of automation controller operator deployments ready
+  ansible.builtin.debug:
     verbosity: 1
     msg:
-      - "Automation controller deployments ready: {{ controller_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length }}"
+      - "Automation controller deployments ready: {{ controller_operator_status.resources | json_query('[*].status.readyReplicas') | select('match', '1') | list | length }}"
 
 - name: Check if we have an aws gp2-csi storage class available
   kubernetes.core.k8s_info:
@@ -136,12 +137,21 @@
         service_type: ClusterIP
         task_privileged: false
 
-- name: Wait for all Ansible platform pods to be running
-  ansible.builtin.shell: kubectl get pods -o json -n ansible-automation-platform -l app.kubernetes.io/part-of=ctrl
-  register: kubectl_get_pods
-  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
-  retries: 20
+- name: Check status of automation controller web component
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    name: ctrl-web
+    namespace: ansible-automation-platform
+  register: controller_web_status
+  until: controller_web_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length == 1
+  retries: 30
   delay: 3
+
+- name: Print number of automation controller web deployments ready
+  ansible.builtin.debug:
+    verbosity: 1
+    msg:
+      - "Automation controller web deployments ready: {{ controller_web_status.resources | json_query('[*].status.readyReplicas') | select('match', '1') | list | length }}"
 
 - name: Get Automation Controller admin credentials
   community.kubernetes.k8s_info:
@@ -159,14 +169,6 @@
     namespace: ansible-automation-platform
   register: controller_route
 
-- ansible.builtin.debug:
-    var: controller_password_secret
-    verbosity: 1
-
-- ansible.builtin.debug:
-    var: controller_route
-    verbosity: 1
-
 - name: Register fact with controller password
   ansible.builtin.set_fact:
     controller_password: "{{ controller_password_secret.resources[0].data.password | b64decode }}"
@@ -175,7 +177,7 @@
 - name: Give the controller time to start
   ansible.builtin.uri:
     url: "{{ controller_url }}/api/v2/ping/"
-    validate_certs: no
+    validate_certs: false
   register: result
   until: "result.status == 200"
   retries: 30
@@ -185,9 +187,9 @@
 # 'Red Hat Ansible Automation Platform is currently upgrading.'
 # even if the ping endpoint is reachable. maybe we should check for that.
 # and skip the pause
-- name: Pause for 2 minutes to give the controller time to finish startup
-  ansible.builtin.pause:
-    minutes: 2
+# - name: Pause for 2 minutes to give the controller time to finish startup
+#   ansible.builtin.pause:
+#     minutes: 2
 
 - name: Disable SSL verification for GIT in controller
   ansible.controller.settings:
@@ -199,4 +201,6 @@
     controller_username: admin
     controller_password: "{{ controller_password }}"
     controller_host: "{{ controller_url }}"
-    validate_certs: no
+    validate_certs: false
+  retries: 30
+  delay: 3

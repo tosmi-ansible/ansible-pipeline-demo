@@ -1,3 +1,4 @@
+---
 #
 # On monday we install automation controller
 #
@@ -5,25 +6,26 @@
 # - controller_url
 # - controller_password
 #
-- include_tasks: install.yml
+- name: Install Ansible Controller
+  ansible.builtin.include_tasks: install.yml
 
-#
-# Check the state of the subscription
+# On Tuesday we check the state of the subscription
 #
 # This will fail if no subscription is available
 #
-- include_tasks: subscription.yml
+- name: Check for a subscriptions
+  ansible.builtin.include_tasks: subscription.yml
 
+# On Wednesday we create an authentication token
 #
-# First we need a authentication token
-#
-- include_tasks: token.yml
+- name: Create authentication token
+  ansible.builtin.include_tasks: token.yml
 
-#
-# Now we can add all required content
+# On Thursday we add all required content
 #
 # - Projects
 # - Job Templates
 #
-- include_tasks: content.yml
+- name: Create required Ansible Controller content
+  ansible.builtin.include_tasks: content.yml
   when: controller_subscription_installed
