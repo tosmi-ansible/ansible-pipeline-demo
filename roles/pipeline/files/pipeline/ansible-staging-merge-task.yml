@@ -104,7 +104,7 @@ spec:
         echo "Merging ${PARAM_SOURCE_BRANCH} into ${PARAM_DESTINATION_BRANCH} in ${WORKSPACE_OUTPUT_PATH}"
         /usr/bin/git fetch
         /usr/bin/git checkout "$PARAM_DESTINATION_BRANCH"
-        /usr/bin/git merge "$PARAM_SOURCE_BRANCH"
+        /usr/bin/git merge "origin/$PARAM_SOURCE_BRANCH"
         /usr/bin/git remote -v
 
         id -u
