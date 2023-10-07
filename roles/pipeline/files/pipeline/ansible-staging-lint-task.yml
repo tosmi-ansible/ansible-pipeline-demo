@@ -13,7 +13,7 @@ spec:
       description: Directory containing a the ansible files to be linted
   steps:
     - name: lint
-      image: quay.io/ansible/creator-ee:v0.9.7
+      image: quay.io/ansible/creator-ee:v0.20.0
       env:
       - name: WORKSPACE_OUTPUT_PATH
         value: $(workspaces.output.path)
@@ -24,8 +24,6 @@ spec:
 
         set -x
 
-        find "$WORKSPACE_OUTPUT_PATH" -ls
-
         # silence fatal: detected dubious ownership in repository at
         # '/workspace/output' messages. '/workspace/output' is owned
         # by root.
@@ -33,11 +31,9 @@ spec:
 
         cd "$WORKSPACE_OUTPUT_PATH" || exit 1
 
-        /usr/bin/git checkout main
-
         GIT_BRANCH=$(/usr/bin/git branch --show-current)
 
-        echo "Linting git branch ${GIT_BRANCH} in ${WORKSPACE_OUTPUT_PATH}"
+        echo "Linting in ${WORKSPACE_OUTPUT_PATH}"
 
-        /usr/local/bin/ansible-lint --version
+        /usr/local/bin/ansible-lint --version --nocolor
         /usr/local/bin/ansible-lint -v --nocolor --exclude collections/
