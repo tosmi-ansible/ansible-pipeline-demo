@@ -1,3 +1,4 @@
+---
 - name: Uninstall Pipeline Demo
   hosts: localhost
   vars:
@@ -6,3 +7,14 @@
     - ansible.builtin.include_role:
         name: gitea
         tasks_from: uninstall.yaml
+
+- name: Uninstall Automation Controller
+  kubernetes.core.k8s:
+    state: absent
+    definition:
+      apiVersion: automationcontroller.ansible.com/v1beta1
+      kind: AutomationController
+      metadata:
+        labels:
+        name: ctrl
+        namespace: ansible-automation-platform
