@@ -1,0 +1,28 @@
+#1696258009
+export GITEA_PASSWORD=$(oc extract secret/gitea-developer-password -n gitea --to=-)
+#1696258019
+export GITEA_HOST=$(oc get route gitea-https  -n gitea -o jsonpath='{.spec.host}')
+#1696677794
+export KUBECONFIG=/var/home/pinhead/tmp/hub-4.13.9/auth/kubeconfig
+#1696258035
+git -c http.sslVerify=false clone https://developer:"$GITEA_PASSWORD"@"$GITEA_HOST"/developer/ansible-example-collection.git
+#1696677935
+cd ansible-example-collection/
+#1696677974
+git config http.sslVerify false
+#1696677939
+git branch -a
+#1696677951
+git checkout -b feature/demo
+#1696677964
+git push origin feature/demo
+#1696678115
+git add linux-soe.yml
+#1696678126
+git commit -m 'updated linux soe'
+#1696678134
+git push origin feature/demo
+#1696678207
+git checkout main
+#1696678222
+git push origin :feature/demo
