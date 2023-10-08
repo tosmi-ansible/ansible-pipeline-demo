@@ -34,7 +34,7 @@
     namespace: openshift-pipelines
   register: pipelines_status
   until: pipelines_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length == 2
-  retries: 30
+  retries: 40
   delay: 3
 
 - name: Print number of deployments ready
