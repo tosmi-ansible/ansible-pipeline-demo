@@ -144,7 +144,7 @@
     namespace: ansible-automation-platform
   register: controller_web_status
   until: controller_web_status.resources | json_query('[*].status.readyReplicas') | select ('match','1') | list | length == 1
-  retries: 30
+  retries: 50
   delay: 3
 
 - name: Print number of automation controller web deployments ready
@@ -190,6 +190,20 @@
 # - name: Pause for 2 minutes to give the controller time to finish startup
 #   ansible.builtin.pause:
 #     minutes: 2
+
+- name: Give the controller time to start
+  ansible.builtin.uri:
+    url: "{{ controller_url }}/api/v2/ping/"
+    validate_certs: false
+  register: controller_result
+  until: "controller_result.status == 200"
+  retries: 30
+  delay: 3
+
+- name: Print ping response
+  ansible.builtin.debug:
+    msg: "Ping endpoint result: {{ controller_result }}"
+    verbosity: 1
 
 - name: Disable SSL verification for GIT in controller
   ansible.controller.settings:
