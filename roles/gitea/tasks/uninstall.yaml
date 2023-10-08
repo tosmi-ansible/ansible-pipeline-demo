@@ -16,4 +16,4 @@
         namespace: "{{ gitea_namespace }}"
 
 - name: Remove all PVC's with oc
-  ansible.builtin.command: oc delete pvc --all
+  ansible.builtin.command: oc delete pvc --all -n gitea
