@@ -29,6 +29,9 @@ verify:
 setup: verify collections ## Run setup playbook
 	ansible-playbook $(VERBOSITY) playbooks/setup.yml
 
+reset-gitea: verify collections ## Run re-install gitea and run setup
+	ansible-playbook $(VERBOSITY) playbooks/reset-gitea.yml
+
 ##################
 # Helper targets #
 ##################
