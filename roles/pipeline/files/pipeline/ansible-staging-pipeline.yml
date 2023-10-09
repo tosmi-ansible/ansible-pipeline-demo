@@ -60,7 +60,7 @@ spec:
       runAfter:
         - run-molecule
 
-    - name: controller-job
+    - name: deploy-to-dev
       params:
         - name: controller-url
           value: http://ctrl-service.ansible-automation-platform
@@ -80,4 +80,4 @@ spec:
       taskRef:
         name: pull-request
       runAfter:
-        - controller-job
+        - deploy-to-dev
