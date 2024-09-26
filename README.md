@@ -388,6 +388,10 @@ Confirm going back to the Ansible Controller web UI, the job template _Pipeline 
   - Merge feature to main and release
 - Extend testing of playbooks
   - Use [molecule](https://molecule.readthedocs.io/en/latest/index.html) in the pipeline
+  - Use [ServerSpec](https://serverspec.org/) or [goss](https://github.com/goss-org/goss) to spec-test configuration changes
+- Use [Red Hat OpenShift Dev Spaces](https://developers.redhat.com/products/openshift-dev-spaces/overview) for providing a pre-configured developer environment
+- Deploy temporary virtual machines for playbook testing with [OpenShift Virtualization](https://www.redhat.com/en/technologies/cloud-computing/openshift/virtualization)
+  - Deploy machines when pushing a new feature branch, remove machines when feature branch gets deleted
 
 ## setup.yml options
 
